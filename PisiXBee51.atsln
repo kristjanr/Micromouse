@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "PisiXBee51", "PisiXBee51\PisiXBee51.cproj", "{560B9278-7B61-444B-8B32-7FBBC002045B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{560B9278-7B61-444B-8B32-7FBBC002045B}.Debug|AVR.ActiveCfg = Debug|AVR
+		{560B9278-7B61-444B-8B32-7FBBC002045B}.Debug|AVR.Build.0 = Debug|AVR
+		{560B9278-7B61-444B-8B32-7FBBC002045B}.Release|AVR.ActiveCfg = Release|AVR
+		{560B9278-7B61-444B-8B32-7FBBC002045B}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
