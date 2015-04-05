@@ -60,7 +60,8 @@ uint16_t adc_read(uint8_t channel)
     ADC_Ch_Conversion_Start(&ADCA.CH0);
 
     while(!ADC_Ch_Conversion_Complete(&ADCA.CH0));
-
+    if(ADC_ResultCh_GetWord_Signed(&ADCA.CH0, offset) < 0)
+        return 0;
     return ADC_ResultCh_GetWord_Signed(&ADCA.CH0, offset);
 }
 
