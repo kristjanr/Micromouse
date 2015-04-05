@@ -34,6 +34,9 @@ void straight();
 void go();
 void stop();
 void turn_around();
+bool wall();
+void calibrate_front();
+void back_to_center();
 int turn_seq = 0;
 // bool directions[] = {false, false, true, true, true, true, false, true, true, true, true, true, false, false, true};
 #define RIGHT 1
@@ -63,24 +66,46 @@ int main(void)
     }
 }
 
+void go()
+{
+    int32_t count = 0;
+    char buff[100];
+    while(!sw1_read())
+    {
+        count ++;
+        if (count % 10 == 0)
+        {
+            send_debug_msg(buff);
+        }
+        if(wall())
+        {
+            stop();
+            calibrate_front();
+            back_to_center();
+        }
+        _delay_ms(50);
+    }
+    rgb_set(GREEN);
+}
+
 bool wall()
 {
-    return get_front_left() > 180 && get_front_right() > 180;
+    return (get_front_left() + get_front_right()) > 170;
 }
 
 void calibrate_front()
 {
-    motors(0, 0);
     _delay_ms(5);
     int count = 0;
+    int speed = 400;
     while(count < 50)
     {
-        count += 1;
-        uint16_t fl = get_front_left();
-        uint16_t fr = get_front_right();
+        stop();
+        count ++;
+        int fl = get_front_left();
+        int fr = get_front_right();
         int fd = fl - fr;
         int time = abs(fd);
-        int speed = 400;
         if (fd > 5)
         {
             motors(-speed, speed);
@@ -91,43 +116,23 @@ void calibrate_front()
         }
         delay_ms(time);
     }
-    motors(0, 0);
+    stop();
 }
 
-void go()
+void back_to_center()
 {
-    while(!sw1_read())
-    {
-        calibrate_front();
-        _delay_ms(1000);
-
-        //int side_diff = abs(get_left() - get_right());
-        //if (wall())
-        //{
-        //turn_around();
-        //}
-        //else if (side_diff > 35 && get_left() < 40)
-        //{
-        //turn(2);
-        //}
-        //else if (side_diff > 35 && get_right() < 40)
-        //{
-        //turn(1);
-        //}
-        //else if (side_diff <= 35 && get_right() < 40 && get_left() < 40 && !wall())
-        //{
-        //turn(0);
-        //}
-        //else
-        //{
-        //straight();
-        //_delay_ms(5);
-        //}
-    }
-    rgb_set(BLUE);
+    bool in_center = false;
     stop();
-    _delay_ms(300);
-    rgb_set(GREEN);
+    while (!in_center)
+    {
+        int fl = get_front_left();
+        int fr = get_front_right();
+        // TO DO: What is the right condition for checking if in center?
+        in_center = (fl > 115 && fl < 140) && (fr > 115 && fr < 140);
+        motors(-400, -400);
+        _delay_ms(10);
+    }
+    stop();
 }
 
 void straight()
@@ -158,13 +163,11 @@ void motors(int16_t l_speed, int16_t r_speed)
     // correct the slight curving to right
     if (l_speed != 0 && r_speed != 0)
     {
-        int16_t left = l_speed - 12;
-        motor_set(left, r_speed);
+        if (l_speed > 0) l_speed = l_speed - 12;
+        else l_speed = l_speed + 12;
     }
-    else
-    {
-        motor_set(l_speed, r_speed);
-    }
+
+    motor_set(l_speed, r_speed);
 }
 
 void turn(int direction)
@@ -193,7 +196,7 @@ void turn(int direction)
 
 void turn_around()
 {
-    motor_set(500, -500);
+    motor_set(400, -400);
     _delay_ms(675);
 }
 
