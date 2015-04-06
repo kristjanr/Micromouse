@@ -28,4 +28,13 @@
 *.app
 *.i*86
 *.x86_64
+
 *.hex
+*.eep
+*.srec
+*.map
+*.lss
+*.cproj
+*.atsuo
+*.atsln
+.idea
