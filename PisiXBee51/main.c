@@ -19,6 +19,7 @@
 #define FRONT_RIGHT_S 3
 #define RIGHT_S  5
 #define RIGHT_DIAG_S 2
+#define SPEED 800
 void delay_ms();
 void send_debug_msg();
 uint16_t get_left();
@@ -37,6 +38,7 @@ void turn_around();
 bool wall();
 void calibrate_front();
 void back_to_center();
+void gradual_stop();
 int turn_seq = 0;
 // bool directions[] = {false, false, true, true, true, true, false, true, true, true, true, true, false, false, true};
 #define RIGHT 1
@@ -52,18 +54,19 @@ int main(void)
     radio_init(57600);    // Seadista raadiomooduli UART
     motor_init();        // Seadista mootorikontroller
     char buff[100];
-    rgb_set(BLUE);
+    rgb_set(PINK);
     while(1)
     {
         if(sw2_read())
         {
-            rgb_set(RED);
+            rgb_set(OFF);
             _delay_ms(1000);
             go();
         }
         _delay_ms(500);
         send_debug_msg(buff);
     }
+    rgb_set(PINK);
 }
 
 void go()
@@ -72,40 +75,50 @@ void go()
     char buff[100];
     while(!sw1_read())
     {
+        _delay_ms(5);
         count ++;
         if (count % 10 == 0)
         {
             send_debug_msg(buff);
         }
-        if(wall())
+        straight();
+        if (wall())
         {
-            stop();
+            gradual_stop();
+            rgb_set(RED);
+            _delay_ms(1000);
+
+            //rgb_set(YELLOW);
+            //back_to_center();
+
+            rgb_set(WHITE);
+            _delay_ms(1000);
             calibrate_front();
-            back_to_center();
+
+            rgb_set(BLUE);
+            _delay_ms(1000);
+            turn_around();
+            _delay_ms(1000);
         }
-        _delay_ms(50);
     }
-    rgb_set(GREEN);
+    stop();
 }
 
 bool wall()
 {
-    return (get_front_left() + get_front_right()) > 170;
+    return (get_front_left() + get_front_right()) > 180;
 }
 
 void calibrate_front()
 {
-    _delay_ms(5);
     int count = 0;
-    int speed = 400;
-    while(count < 50)
+    while(count < 100)
     {
-        stop();
         count ++;
         int fl = get_front_left();
         int fr = get_front_right();
         int fd = fl - fr;
-        int time = abs(fd);
+        int speed = abs(fd) * 10;
         if (fd > 5)
         {
             motors(-speed, speed);
@@ -114,31 +127,42 @@ void calibrate_front()
         {
             motors(speed, -speed);
         }
-        delay_ms(time);
-    }
-    stop();
-}
-
-void back_to_center()
-{
-    bool in_center = false;
-    stop();
-    while (!in_center)
-    {
-        int fl = get_front_left();
-        int fr = get_front_right();
-        // TO DO: What is the right condition for checking if in center?
-        in_center = (fl > 115 && fl < 140) && (fr > 115 && fr < 140);
-        motors(-400, -400);
-        _delay_ms(10);
+        delay_ms(10);
     }
     stop();
 }
 
 void straight()
 {
-    int diag_diff = get_left_diag() - get_right_diag();
-    motors(400 + diag_diff, 400 - diag_diff);
+    uint16_t ld = get_left_diag();
+    uint16_t rd = get_right_diag();
+    bool both_walls = (ld > 25 && rd > 14);
+    bool only_left_wall = !both_walls && rd < 12;
+    bool only_right_wall = !both_walls && ld < 12;
+    int diag_diff = 0;
+    // compensate right diagonal sensor
+    rd = rd + 12;
+    if(both_walls)
+    {
+        rgb_set(GREEN);
+        diag_diff = ld - rd;
+    }
+    else if(only_left_wall)
+    {
+        rgb_set(BLUE);
+
+        diag_diff = ld - 45;
+    }
+    else if(only_right_wall)
+    {
+        rgb_set(RED);
+        diag_diff = 45 - rd;
+    }
+    else
+    {
+        diag_diff=0;
+    }
+    motors(SPEED + diag_diff*3, SPEED - diag_diff*3);
 }
 
 void motors(int16_t l_speed, int16_t r_speed)
@@ -196,8 +220,10 @@ void turn(int direction)
 
 void turn_around()
 {
-    motor_set(400, -400);
-    _delay_ms(675);
+    // -500 and 500 for 720ms does 180 degrees
+    motor_set(500, -500);
+    _delay_ms(700);
+    stop();
 }
 
 void stop()
@@ -205,6 +231,17 @@ void stop()
     motor_set(0, 0);
 }
 
+void gradual_stop()
+{
+    int speed = SPEED;
+    int to_subtract = round(SPEED / 50);
+    while(speed > 0)
+    {
+        _delay_ms(5);
+        speed -= to_subtract;
+        motors(speed, speed);
+    }
+}
 void send_debug_msg(char * buff)
 {
     uint16_t fl = get_front_left();
@@ -232,12 +269,12 @@ void delay_ms(uint16_t count)
 
 uint16_t get_front_left()
 {
-    return adc_read(FRONT_LEFT_S);
+    return adc_read(FRONT_LEFT_S) + 10;
 }
 
 uint16_t get_front_right()
 {
-    return adc_read(FRONT_RIGHT_S) + 4;
+    return adc_read(FRONT_RIGHT_S);
 }
 
 uint16_t get_left_diag()
@@ -247,12 +284,12 @@ uint16_t get_left_diag()
 
 uint16_t get_right_diag()
 {
-    return adc_read(RIGHT_DIAG_S) + 3;
+    return adc_read(RIGHT_DIAG_S);
 }
 
 uint16_t get_left()
 {
-    return adc_read(LEFT_S) + 2;
+    return adc_read(LEFT_S);
 }
 
 uint16_t get_right()
