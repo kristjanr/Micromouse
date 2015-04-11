@@ -28,6 +28,7 @@ uint16_t get_front_left();
 uint16_t get_right();
 uint16_t get_right_diag();
 uint16_t get_front_right();
+uint16_t one_square_delay();
 void forward();
 void turn(int);
 void motors();
@@ -39,12 +40,24 @@ bool wall();
 void calibrate_front();
 void back_to_center();
 void gradual_stop();
-int turn_seq = 0;
-// bool directions[] = {false, false, true, true, true, true, false, true, true, true, true, true, false, false, true};
+void put_n_squares(int);
+#define N 0
+#define E 90
+#define S 180
+#define W -90
+int normalize_direction(int);
+#define LEFT_DIRECTION -90
+#define RIGHT_DIRECTION 90
 #define RIGHT 1
 #define LEFT 2
 #define RANDOM 0
-
+#define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
+int turns_array[] = {RIGHT, 0, 0, 0, 0, LEFT, RIGHT, LEFT, 0, LEFT, 0, RIGHT, LEFT, LEFT, RIGHT, LEFT, LEFT, RIGHT, 0, 0};
+int turns = 0;
+bool turn_if_needed();
+int robot_direction = N;
+void send_direction();
+char buff[100];
 
 int main(void)
 {
@@ -67,46 +80,113 @@ int main(void)
         send_debug_msg(buff);
     }
     rgb_set(PINK);
+    return 0;
 }
 
 void go()
 {
     int32_t count = 0;
-    char buff[100];
-    while(!sw1_read())
+    int squares = 1;
+    while(!sw1_read() && turns < NELEMS(turns_array)) //turns < NELEMS(turns_array)
     {
         _delay_ms(5);
         count ++;
-        if (count % 10 == 0)
-        {
-            send_debug_msg(buff);
-        }
+        // with this debug message sending, the one square delay is 130. Without:
+        //if (count % 10 == 0)
+        //{
+        //send_debug_msg(buff);
+        //}
         straight();
+        if(count % one_square_delay() == 0)
+        {
+            squares += 1;
+            sprintf(buff, "sq: %d \n\r", squares);
+            radio_puts(buff);
+            gradual_stop();
+            turn_if_needed();
+        }
         if (wall())
         {
             gradual_stop();
-            rgb_set(RED);
-            _delay_ms(1000);
-
-            //rgb_set(YELLOW);
-            //back_to_center();
-
-            rgb_set(WHITE);
-            _delay_ms(1000);
-            calibrate_front();
-
-            rgb_set(BLUE);
-            _delay_ms(1000);
-            turn_around();
-            _delay_ms(1000);
+            if(count % one_square_delay() > one_square_delay() - 40)
+            {
+                count = 0;
+                squares += 1;
+                sprintf(buff, "wall! sq: %d \n\r", squares);
+                radio_puts(buff);
+            }
+            //calibrate_front();
+            if (!turn_if_needed())
+            {
+                rgb_set(RED);
+                turn_around();
+            }
         }
     }
     stop();
 }
 
+int n_direction()
+{
+    if (robot_direction == 360)
+    {
+        return N;
+    }
+    else if (robot_direction == -180)
+    {
+        return S;
+    }
+    else if (robot_direction == 270)
+    {
+        return W;
+    }
+    else
+    {
+        return robot_direction;
+    }
+}
+
+void send_direction()
+{
+    sprintf(buff, "direction %d \n\r", n_direction());
+    radio_puts(buff);
+}
+
+bool turn_if_needed()
+{
+    sprintf(buff, "turns before: %d \n\r", turns);
+    radio_puts(buff);
+    if (get_left() < 80 && turns_array[turns] == LEFT)
+    {
+        turn(LEFT);
+        turns += 1;
+        return true;
+    }
+    else if (get_right() < 80 && turns_array[turns] == RIGHT)
+    {
+        turn(RIGHT);
+        turns += 1;
+        return true;
+    }
+    else if (get_left() < 80 || get_right() < 80)
+    {
+        turns += 1;
+        return false;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+uint16_t one_square_delay()
+{
+    return 140;
+}
+
 bool wall()
 {
-    return (get_front_left() + get_front_right()) > 180;
+    return get_front_left()  > 75 || get_front_right() > 75;
 }
 
 void calibrate_front()
@@ -136,33 +216,27 @@ void straight()
 {
     uint16_t ld = get_left_diag();
     uint16_t rd = get_right_diag();
-    bool both_walls = (ld > 25 && rd > 14);
-    bool only_left_wall = !both_walls && rd < 12;
-    bool only_right_wall = !both_walls && ld < 12;
+    bool no_walls = rd < 25 && ld < 25;
+    bool left_wall = ld > rd;
+    bool right_wall = rd > ld;
     int diag_diff = 0;
-    // compensate right diagonal sensor
-    rd = rd + 12;
-    if(both_walls)
+    if(no_walls)
     {
         rgb_set(GREEN);
-        diag_diff = ld - rd;
+        diag_diff=0;
     }
-    else if(only_left_wall)
+    else if (left_wall)
     {
         rgb_set(BLUE);
 
-        diag_diff = ld - 45;
+        diag_diff = ld - 42;
     }
-    else if(only_right_wall)
+    else if(right_wall)
     {
         rgb_set(RED);
-        diag_diff = 45 - rd;
+        diag_diff = 42 - rd;
     }
-    else
-    {
-        diag_diff=0;
-    }
-    motors(SPEED + diag_diff*3, SPEED - diag_diff*3);
+    motors(SPEED + diag_diff*4, SPEED - diag_diff*4);
 }
 
 void motors(int16_t l_speed, int16_t r_speed)
@@ -196,26 +270,20 @@ void motors(int16_t l_speed, int16_t r_speed)
 
 void turn(int direction)
 {
-    if (direction != RANDOM)
+    if (direction == RIGHT)
     {
-        turn_seq ++;
-        _delay_ms(500);
-        if (direction == RIGHT)
-        {
-            motors(500, 0);
-        }
-        else if (direction == LEFT)
-        {
-            motors(0, 500);
-        }
-        _delay_ms(625);
-        motors(500, 500);
-        _delay_ms(300);
+        motors(575, -575);
+        robot_direction = n_direction() + RIGHT_DIRECTION;
     }
-    else
+    else if (direction == LEFT)
     {
-        turn(RIGHT);
+        motors(-575, 575);
+        robot_direction = n_direction() + LEFT_DIRECTION;
     }
+    _delay_ms(300);
+    send_direction();
+    motor_set(0,0);
+    _delay_ms(50);
 }
 
 void turn_around()
@@ -223,7 +291,10 @@ void turn_around()
     // -500 and 500 for 720ms does 180 degrees
     motor_set(500, -500);
     _delay_ms(700);
+    robot_direction = n_direction() + 180;
+    send_direction();
     stop();
+    _delay_ms(10);
 }
 
 void stop()
@@ -269,7 +340,7 @@ void delay_ms(uint16_t count)
 
 uint16_t get_front_left()
 {
-    return adc_read(FRONT_LEFT_S) + 10;
+    return adc_read(FRONT_LEFT_S);
 }
 
 uint16_t get_front_right()
