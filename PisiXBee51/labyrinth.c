@@ -4,15 +4,14 @@
  * Created: 11.04.2015 18:08:04
  *  Author: Kristjan Roosild
  */
+#include "labyrinth.h"
 #define NOT_VISITED 'n'
-#define INTERSECTION 'i'
-#define WALL 'w'
-int lab_length = 12;
+#define INTERSECTION '.'
+#define WALL ' '
+int array_length = 23;
 
-char *build_labyrinth()
+void *build_labyrinth()
 {
-    int array_length = lab_length + lab_length - 1;
-    char arr[array_length][array_length];
     char buff[100];
     for (int row = 0; row < array_length; row++)
     {
@@ -20,17 +19,16 @@ char *build_labyrinth()
         {
             if (column % 2 == 0 &&  row % 2 ==0)
             {
-                arr[column][NOT_VISITED];
+                arr[column][row] = NOT_VISITED;
             }
             else if (column % 2 == 1 && row % 2 == 1)
             {
-                arr[column][INTERSECTION];
+                arr[column][row] = INTERSECTION;
             }
             else
             {
-                arr[column][WALL];
+                arr[column][row] = WALL;
             }
         }
     }
-    return (char *)arr;
 }

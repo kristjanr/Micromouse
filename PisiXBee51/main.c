@@ -1,8 +1,8 @@
 /*
 * main.c
 *
-* Created: 18.12.2014 17:50:18
-*  Author: Rain
+* Created: 04.04.2015 12:00:00
+*  Author: Kristjan Roosild
 */
 
 #include <avr/io.h>
@@ -12,6 +12,7 @@
 #include "drivers/motor.h"
 #include "drivers/com.h"
 #include "drivers/gyro.h"
+#include "labyrinth.h"
 #define FRONT_LEFT_S 0
 #define LEFT_S 1
 #define LEFT_DIAG_S 4
@@ -68,6 +69,7 @@ int main(void)
     motor_init();        // Seadista mootorikontroller
     char buff[100];
     rgb_set(PINK);
+    /*
     while(1)
     {
         if(sw2_read())
@@ -80,6 +82,17 @@ int main(void)
         send_debug_msg(buff);
     }
     rgb_set(PINK);
+     */
+
+    build_labyrinth();
+    for (int column = 0; column < array_length; ++column) {
+        for (int row = 0; row < array_length; ++row) {
+            sprintf(buff, "%c ", arr[column][row]);
+            radio_puts(buff);
+        }
+        sprintf(buff, "\n\r");
+        radio_puts(buff);
+    }
     return 0;
 }
 
