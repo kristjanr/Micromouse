@@ -58,7 +58,15 @@ int turns = 0;
 bool turn_if_needed();
 int robot_direction = N;
 void send_direction();
+void print_labyrinth();
 char buff[100];
+int column = 0;
+int row = 0;
+void set_loc();
+void read_set_walls();
+void add_front_wall_info();
+void add_left_wall_info();
+void add_right_wall_info();
 
 int main(void)
 {
@@ -67,10 +75,9 @@ int main(void)
     adc_init();            // Seadista ADC kanal 0
     radio_init(57600);    // Seadista raadiomooduli UART
     motor_init();        // Seadista mootorikontroller
-    char buff[100];
+    build_labyrinth();
     rgb_set(PINK);
-    /*
-    while(1)
+    /* while(1)
     {
         if(sw2_read())
         {
@@ -82,18 +89,119 @@ int main(void)
         send_debug_msg(buff);
     }
     rgb_set(PINK);
-     */
+    */
+    print_labyrinth();
+    _delay_ms(100);
+    read_set_walls();
+    _delay_ms(100);
+    print_labyrinth();
+    return 0;
+}
 
-    build_labyrinth();
-    for (int column = 0; column < array_length; ++column) {
-        for (int row = 0; row < array_length; ++row) {
-            sprintf(buff, "%c ", arr[column][row]);
+void print_labyrinth()
+{
+    sprintf(buff, "\n\r Printing labyrinth: \n\r");
+    radio_puts(buff);
+    for (int column = 0; column < ARRAY_LENGTH; ++column)
+    {
+        for (int row = 0; row < ARRAY_LENGTH; ++row)
+        {
+            sprintf(buff, "%d ", arr[column][row]);
             radio_puts(buff);
         }
         sprintf(buff, "\n\r");
         radio_puts(buff);
     }
-    return 0;
+}
+
+void set_loc()
+{
+    if(robot_direction == N)
+    {
+        column += 1;
+    }
+    else if (robot_direction == S)
+    {
+        column -= 1;
+    }
+    else if (robot_direction == E)
+    {
+        row += 1;
+    }
+    else if (robot_direction == W)
+    {
+        row -= 1;
+    }
+}
+
+void read_set_walls()
+{
+    // read front wall
+    if (get_front_left() > 80 && get_front_right() > 80) add_front_wall_info();
+    // read right wall
+    if (get_right() > 80) add_right_wall_info();
+    // read left wall
+    if (get_left() > 80) add_left_wall_info();
+}
+
+void add_front_wall_info()
+{
+    if (robot_direction == N)
+    {
+        arr[row][column] += 1;
+    }
+    else if (robot_direction == E)
+    {
+        arr[row][column] += 2;
+    }
+    else if (robot_direction == S)
+    {
+        arr[row][column] += 4;
+    }
+    else if (robot_direction == W)
+    {
+        arr[row][column] += 8;
+    }
+}
+
+void add_right_wall_info()
+{
+    if (robot_direction == N)
+    {
+        arr[row][column] += 2;
+    }
+    else if (robot_direction == E)
+    {
+        arr[row][column] += 4;
+    }
+    else if (robot_direction == S)
+    {
+        arr[row][column] += 8;
+    }
+    else if (robot_direction == W)
+    {
+        arr[row][column] += 1;
+    }
+}
+
+void add_left_wall_info()
+{
+    if (robot_direction == N)
+    {
+        arr[row][column] += 8;
+    }
+    else if (robot_direction == E)
+    {
+        arr[row][column] += 1;
+    }
+    else if (robot_direction == S)
+    {
+        arr[row][column] += 2;
+    }
+    else if (robot_direction == W)
+    {
+        arr[row][column] += 4;
+    }
 }
 
 void go()
@@ -116,7 +224,9 @@ void go()
             sprintf(buff, "sq: %d \n\r", squares);
             radio_puts(buff);
             gradual_stop();
-            turn_if_needed();
+            print_labyrinth();
+            set_loc();
+            read_set_walls();
         }
         if (wall())
         {

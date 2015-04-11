@@ -8,9 +8,9 @@
 
 #ifndef LABYRINTH_H_
 #define LABYRINTH_H_
-char arr[23][23];
-int array_length;
-void *build_labyrinth();
+#define ARRAY_LENGTH 12
+int arr[ARRAY_LENGTH][ARRAY_LENGTH];
+void build_labyrinth();
 
 
 

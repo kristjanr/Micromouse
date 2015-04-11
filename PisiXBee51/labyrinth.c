@@ -5,30 +5,15 @@
  *  Author: Kristjan Roosild
  */
 #include "labyrinth.h"
-#define NOT_VISITED 'n'
-#define INTERSECTION '.'
-#define WALL ' '
-int array_length = 23;
+#define NOT_VISITED 0
 
-void *build_labyrinth()
+void build_labyrinth()
 {
-    char buff[100];
-    for (int row = 0; row < array_length; row++)
+    for (int row = 0; row < ARRAY_LENGTH; row++)
     {
-        for (int column = 0; column < array_length; column++)
+        for (int column = 0; column < ARRAY_LENGTH; column++)
         {
-            if (column % 2 == 0 &&  row % 2 ==0)
-            {
-                arr[column][row] = NOT_VISITED;
-            }
-            else if (column % 2 == 1 && row % 2 == 1)
-            {
-                arr[column][row] = INTERSECTION;
-            }
-            else
-            {
-                arr[column][row] = WALL;
-            }
+            arr[column][row] = NOT_VISITED;
         }
     }
 }
