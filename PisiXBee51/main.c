@@ -5,14 +5,32 @@
 *  Author: Kristjan Roosild
 */
 
+#include "labyrinth.h"
+
 #include <avr/io.h>
 #include <stdlib.h>
 #include "drivers/board.h"
 #include "drivers/adc.h"
 #include "drivers/motor.h"
 #include "drivers/com.h"
-#include "drivers/gyro.h"
-#include "labyrinth.h"
+
+int n_direction();
+#define LEFT_DIRECTION -90
+#define RIGHT_DIRECTION 90
+#define N 0
+#define E 90
+#define S 180
+#define W -90
+int robot_direction = E;
+void send_direction();
+int column = 0;
+int row = 0;
+void set_loc();
+void read_set_walls();
+void add_front_wall_info();
+void add_left_wall_info();
+void add_right_wall_info();
+
 #define FRONT_LEFT_S 0
 #define LEFT_S 1
 #define LEFT_DIAG_S 4
@@ -20,9 +38,11 @@
 #define FRONT_RIGHT_S 3
 #define RIGHT_S  5
 #define RIGHT_DIAG_S 2
+
 #define SPEED 800
+
 void delay_ms();
-void send_debug_msg();
+
 uint16_t get_left();
 uint16_t get_left_diag();
 uint16_t get_front_left();
@@ -31,7 +51,12 @@ uint16_t get_right_diag();
 uint16_t get_front_right();
 uint16_t one_square_delay();
 void forward();
+
+#define RIGHT 1
+#define LEFT 2
+#define RANDOM 0
 void turn(int);
+
 void motors();
 void straight();
 void go();
@@ -41,32 +66,17 @@ bool wall();
 void calibrate_front();
 void back_to_center();
 void gradual_stop();
-void put_n_squares(int);
-#define N 0
-#define E 90
-#define S 180
-#define W -90
-int normalize_direction(int);
-#define LEFT_DIRECTION -90
-#define RIGHT_DIRECTION 90
-#define RIGHT 1
-#define LEFT 2
-#define RANDOM 0
+
+int turns = 0;
 #define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
 int turns_array[] = {RIGHT, 0, 0, 0, 0, LEFT, RIGHT, LEFT, 0, LEFT, 0, RIGHT, LEFT, LEFT, RIGHT, LEFT, LEFT, RIGHT, 0, 0};
-int turns = 0;
 bool turn_if_needed();
-int robot_direction = N;
-void send_direction();
-void print_labyrinth();
+
 char buff[100];
-int column = 0;
-int row = 0;
-void set_loc();
-void read_set_walls();
-void add_front_wall_info();
-void add_left_wall_info();
-void add_right_wall_info();
+void print_labyrinth();
+void send_debug_msg();
+
+
 
 int main(void)
 {
@@ -92,21 +102,27 @@ int main(void)
     */
     print_labyrinth();
     _delay_ms(100);
-    read_set_walls();
-    _delay_ms(100);
-    print_labyrinth();
+    //read_set_walls();
+    //_delay_ms(100);
+    //print_labyrinth();
     return 0;
+}
+
+void send_direction()
+{
+    sprintf(buff, "direction %d \n\r", n_direction());
+    radio_puts(buff);
 }
 
 void print_labyrinth()
 {
     sprintf(buff, "\n\r Printing labyrinth: \n\r");
     radio_puts(buff);
-    for (int column = 0; column < ARRAY_LENGTH; ++column)
+    for (int row = 0; row < ARRAY_LENGTH; ++row)
     {
-        for (int row = 0; row < ARRAY_LENGTH; ++row)
+        for (int column = 0; column < ARRAY_LENGTH; ++column)
         {
-            sprintf(buff, "%d ", arr[column][row]);
+            sprintf(buff, "%d ", arr[row][column]);
             radio_puts(buff);
         }
         sprintf(buff, "\n\r");
@@ -114,23 +130,68 @@ void print_labyrinth()
     }
 }
 
+void go()
+{
+    int32_t count = 0;
+    int squares = 1;
+    while(!sw1_read()) //turns < NELEMS(turns_array)
+    {
+        _delay_ms(5);
+        count ++;
+        // with this debug message sending, the one square delay is 130. Without: 140
+        //if (count % 10 == 0)
+        //{
+        //send_debug_msg(buff);
+        //}
+        straight();
+        if(count % one_square_delay() == 0)
+        {
+            squares += 1;
+            sprintf(buff, "sq: %d \n\r", squares);
+            radio_puts(buff);
+            gradual_stop();
+            print_labyrinth();
+            set_loc();
+            read_set_walls();
+        }
+        if (wall())
+        {
+            gradual_stop();
+            if(count % one_square_delay() > one_square_delay() - 40)
+            {
+                count = 0;
+                squares += 1;
+                sprintf(buff, "wall! sq: %d \n\r", squares);
+                radio_puts(buff);
+            }
+            //calibrate_front();
+            if (!turn_if_needed())
+            {
+                rgb_set(RED);
+                turn_around();
+            }
+        }
+    }
+    stop();
+}
+
 void set_loc()
 {
     if(robot_direction == N)
     {
-        column += 1;
+        row -= 1;
     }
     else if (robot_direction == S)
     {
-        column -= 1;
+        row += 1;
     }
     else if (robot_direction == E)
     {
-        row += 1;
+        column += 1;
     }
     else if (robot_direction == W)
     {
-        row -= 1;
+        column -= 1;
     }
 }
 
@@ -204,51 +265,6 @@ void add_left_wall_info()
     }
 }
 
-void go()
-{
-    int32_t count = 0;
-    int squares = 1;
-    while(!sw1_read() && turns < NELEMS(turns_array)) //turns < NELEMS(turns_array)
-    {
-        _delay_ms(5);
-        count ++;
-        // with this debug message sending, the one square delay is 130. Without:
-        //if (count % 10 == 0)
-        //{
-        //send_debug_msg(buff);
-        //}
-        straight();
-        if(count % one_square_delay() == 0)
-        {
-            squares += 1;
-            sprintf(buff, "sq: %d \n\r", squares);
-            radio_puts(buff);
-            gradual_stop();
-            print_labyrinth();
-            set_loc();
-            read_set_walls();
-        }
-        if (wall())
-        {
-            gradual_stop();
-            if(count % one_square_delay() > one_square_delay() - 40)
-            {
-                count = 0;
-                squares += 1;
-                sprintf(buff, "wall! sq: %d \n\r", squares);
-                radio_puts(buff);
-            }
-            //calibrate_front();
-            if (!turn_if_needed())
-            {
-                rgb_set(RED);
-                turn_around();
-            }
-        }
-    }
-    stop();
-}
-
 int n_direction()
 {
     if (robot_direction == 360)
@@ -269,11 +285,6 @@ int n_direction()
     }
 }
 
-void send_direction()
-{
-    sprintf(buff, "direction %d \n\r", n_direction());
-    radio_puts(buff);
-}
 
 bool turn_if_needed()
 {
@@ -490,3 +501,4 @@ uint16_t get_right()
 {
     return adc_read(RIGHT_S);
 }
+
