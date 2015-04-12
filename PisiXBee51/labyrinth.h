@@ -19,7 +19,8 @@
 #define GOAL_COLUMN 5
 #define NOT_VISITED 0
 
-int arr[ARRAY_LENGTH][ARRAY_LENGTH];
+int wall_arr[ARRAY_LENGTH][ARRAY_LENGTH];
+int distance_arr[ARRAY_LENGTH][ARRAY_LENGTH];
 
 void build_labyrinth();
 

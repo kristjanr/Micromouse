@@ -73,7 +73,8 @@ int turns_array[] = {RIGHT, 0, 0, 0, 0, LEFT, RIGHT, LEFT, 0, LEFT, 0, RIGHT, LE
 bool turn_if_needed();
 
 char buff[100];
-void print_labyrinth();
+void print_wall_labyrinth();
+void print_distance_labyrinth();
 void send_debug_msg();
 
 
@@ -100,8 +101,13 @@ int main(void)
     }
     rgb_set(PINK);
     */
-    print_labyrinth();
-    _delay_ms(100);
+    print_wall_labyrinth();
+    _delay_ms(1000);
+    print_distance_labyrinth();
+    _delay_ms(1000);
+    flood();
+    print_distance_labyrinth();
+    _delay_ms(1000);
     //read_set_walls();
     //_delay_ms(100);
     //print_labyrinth();
@@ -114,15 +120,31 @@ void send_direction()
     radio_puts(buff);
 }
 
-void print_labyrinth()
+void print_wall_labyrinth()
 {
-    sprintf(buff, "\n\r Printing labyrinth: \n\r");
+    sprintf(buff, "\n\r Printing wall labyrinth: \n\r");
     radio_puts(buff);
-    for (int row = 0; row < ARRAY_LENGTH; ++row)
+    for (int row = 0; row < ARRAY_LENGTH; row++)
     {
-        for (int column = 0; column < ARRAY_LENGTH; ++column)
+        for (int column = 0; column < ARRAY_LENGTH; column++)
         {
-            sprintf(buff, "%d ", arr[row][column]);
+            sprintf(buff, "%d ", wall_arr[row][column]);
+            radio_puts(buff);
+        }
+        sprintf(buff, "\n\r");
+        radio_puts(buff);
+    }
+}
+
+void print_distance_labyrinth()
+{
+    sprintf(buff, "\n\r Printing distance labyrinth: \n\r");
+    radio_puts(buff);
+    for (int row = 0; row < ARRAY_LENGTH; row++)
+    {
+        for (int column = 0; column < ARRAY_LENGTH; column++)
+        {
+            sprintf(buff, "%d ", distance_arr[row][column]);
             radio_puts(buff);
         }
         sprintf(buff, "\n\r");
@@ -150,7 +172,7 @@ void go()
             sprintf(buff, "sq: %d \n\r", squares);
             radio_puts(buff);
             gradual_stop();
-            print_labyrinth();
+            print_wall_labyrinth();
             set_loc();
             read_set_walls();
         }
@@ -209,19 +231,19 @@ void add_front_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += NWall;
+        wall_arr[row][column] += NWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += EWall;
+        wall_arr[row][column] += EWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += SWall;
+        wall_arr[row][column] += SWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += WWall;
+        wall_arr[row][column] += WWall;
     }
 }
 
@@ -229,19 +251,19 @@ void add_right_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += EWall;
+        wall_arr[row][column] += EWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += SWall;
+        wall_arr[row][column] += SWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += WWall;
+        wall_arr[row][column] += WWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += NWall;
+        wall_arr[row][column] += NWall;
     }
 }
 
@@ -249,19 +271,19 @@ void add_left_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += WWall;
+        wall_arr[row][column] += WWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += NWall;
+        wall_arr[row][column] += NWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += EWall;
+        wall_arr[row][column] += EWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += SWall;
+        wall_arr[row][column] += SWall;
     }
 }
 
