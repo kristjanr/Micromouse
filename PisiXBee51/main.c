@@ -148,19 +148,19 @@ void add_front_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += 1;
+        arr[row][column] += NWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += 2;
+        arr[row][column] += EWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += 4;
+        arr[row][column] += SWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += 8;
+        arr[row][column] += WWall;
     }
 }
 
@@ -168,19 +168,19 @@ void add_right_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += 2;
+        arr[row][column] += EWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += 4;
+        arr[row][column] += SWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += 8;
+        arr[row][column] += WWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += 1;
+        arr[row][column] += NWall;
     }
 }
 
@@ -188,19 +188,19 @@ void add_left_wall_info()
 {
     if (robot_direction == N)
     {
-        arr[row][column] += 8;
+        arr[row][column] += WWall;
     }
     else if (robot_direction == E)
     {
-        arr[row][column] += 1;
+        arr[row][column] += NWall;
     }
     else if (robot_direction == S)
     {
-        arr[row][column] += 2;
+        arr[row][column] += EWall;
     }
     else if (robot_direction == W)
     {
-        arr[row][column] += 4;
+        arr[row][column] += SWall;
     }
 }
 
