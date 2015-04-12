@@ -72,6 +72,7 @@ void flood()
             break;
         }
     }
+    set_next_square();
 }
 
 int highest_neighbouring_square(unsigned int row, unsigned int column)
@@ -98,6 +99,51 @@ int highest_neighbouring_square(unsigned int row, unsigned int column)
     }
     int a[4] = {north, south, east, west};
     return max(a, 4);
+}
+
+void set_next_square()
+{
+    int current_square_value = distance_arr[r_row][r_column];
+    int north = -1;
+    int south = -1;
+    int west = -1;
+    int east = -1;
+    if (!(wall_arr[r_row][r_column] & NWall))
+    {
+        north = get_neighbour(r_row - 1, r_column);
+    }
+    if (!(wall_arr[r_row][r_column] & SWall))
+    {
+        south = get_neighbour(r_row + 1, r_column);
+    }
+    if (!(wall_arr[r_row][r_column] & WWall))
+    {
+        west = get_neighbour(r_row, r_column - 1);
+    }
+    if (!(wall_arr[r_row][r_column] & EWall))
+    {
+        east = get_neighbour(r_row, r_column + 1);
+    }
+    if (north == current_square_value -1)
+    {
+        n_row = r_row -1;
+        n_column = r_column;
+    }
+    else if (south == current_square_value -1)
+    {
+        n_row = r_row +1;
+        n_column = r_column;
+    }
+    else if (west == current_square_value -1)
+    {
+        n_row = r_row;
+        n_column = r_column - 1;
+    }
+    else if (east == current_square_value -1)
+    {
+        n_row = r_row;
+        n_column = r_column + 1;
+    }
 }
 
 int get_neighbour(unsigned int row, unsigned int column)

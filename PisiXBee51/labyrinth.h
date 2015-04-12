@@ -17,6 +17,11 @@
 #define GOAL_ROW 5
 #define GOAL_COLUMN 5
 #define NOT_VISITED 0
+extern int r_row;
+extern int r_column;
+int n_row;
+int n_column;
+
 void flood();
 int wall_arr[ARRAY_LENGTH][ARRAY_LENGTH];
 int distance_arr[ARRAY_LENGTH][ARRAY_LENGTH];
