@@ -8,7 +8,6 @@
 
 #ifndef LABYRINTH_H_
 #define LABYRINTH_H_
-#include <avr/io.h>
 
 #define ARRAY_LENGTH 12
 #define NWall 1
@@ -18,7 +17,7 @@
 #define GOAL_ROW 5
 #define GOAL_COLUMN 5
 #define NOT_VISITED 0
-
+void flood();
 int wall_arr[ARRAY_LENGTH][ARRAY_LENGTH];
 int distance_arr[ARRAY_LENGTH][ARRAY_LENGTH];
 

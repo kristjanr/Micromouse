@@ -6,15 +6,15 @@
  */
 #include "labyrinth.h"
 #define CHECKED 16
-int highest_neighbouring_square(uint8_t, uint8_t);
-int get_neighbour(uint8_t, uint8_t);
+int highest_neighbouring_square(unsigned int, unsigned int);
+int get_neighbour(unsigned int, unsigned int);
 int max(int a[], int num_elements);
 
 void build_labyrinth()
 {
-    for (uint8_t row = 0; row < ARRAY_LENGTH; row++)
+    for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
     {
-        for (uint8_t column = 0; column < ARRAY_LENGTH; column++)
+        for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
         {
             wall_arr[row][column] = NOT_VISITED;
             if (row == 0)
@@ -35,31 +35,32 @@ void build_labyrinth()
             }
         }
     }
-    for (uint8_t row = 0; row < ARRAY_LENGTH; row++)
+    for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
     {
-        for (uint8_t column = 0; column < ARRAY_LENGTH; column++)
+        for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
         {
             distance_arr[row][column] = -1;
         }
     }
-    distance_arr[5][5] = 0;
+    distance_arr[GOAL_ROW][GOAL_COLUMN] = 0;
+    wall_arr[GOAL_ROW][GOAL_COLUMN] = CHECKED;
 }
 
 void flood()
 {
-    uint16_t count = 0;
+    unsigned int count = 0;
     while (1)
     {
         count += 1;
-        for (uint8_t row = 0; row < ARRAY_LENGTH; row++)
+        for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
         {
-            for (uint8_t column = 0; column < ARRAY_LENGTH; column++)
+            for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
             {
                 if (wall_arr[row][column] & CHECKED)
                 {
                     continue;
                 }
-                if (highest_neighbouring_square(row, column) == count -1)
+                if (highest_neighbouring_square(row, column) == (count -1))
                 {
                     distance_arr[row][column] = count;
                     wall_arr[row][column] |= CHECKED;
@@ -73,7 +74,7 @@ void flood()
     }
 }
 
-int highest_neighbouring_square(uint8_t row, uint8_t column)
+int highest_neighbouring_square(unsigned int row, unsigned int column)
 {
     int north = -1;
     int south = -1;
@@ -85,21 +86,21 @@ int highest_neighbouring_square(uint8_t row, uint8_t column)
     }
     if (!(wall_arr[row][column] & SWall))
     {
-        north = get_neighbour(row + 1, column);
+        south = get_neighbour(row + 1, column);
     }
     if (!(wall_arr[row][column] & WWall))
     {
-        north = get_neighbour(row, column - 1);
+        west = get_neighbour(row, column - 1);
     }
     if (!(wall_arr[row][column] & EWall))
     {
-        north = get_neighbour(row, column + 1);
+        east = get_neighbour(row, column + 1);
     }
     int a[4] = {north, south, east, west};
     return max(a, 4);
 }
 
-int get_neighbour(uint8_t row, uint8_t column)
+int get_neighbour(unsigned int row, unsigned int column)
 {
     if (row < 0 || column < 0 || row > ARRAY_LENGTH -1 || column > ARRAY_LENGTH -1)
     {
