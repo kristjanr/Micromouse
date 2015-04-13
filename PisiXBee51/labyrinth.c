@@ -23,7 +23,7 @@ void build_labyrinth()
             {
                 wall_arr[row][column] |= NWall;
             }
-            if (row == 11)
+            if (row == ARRAY_LENGTH - 1)
             {
                 wall_arr[row][column] |= SWall;
             }
@@ -31,7 +31,7 @@ void build_labyrinth()
             {
                 wall_arr[row][column] |= WWall;
             }
-            if (column == 11)
+            if (column == ARRAY_LENGTH - 1)
             {
                 wall_arr[row][column] |= EWall;
             }
@@ -79,8 +79,10 @@ void flood()
     }
     set_next_square();
     // reset wall array to not checked
-    for (unsigned int i = 0; i < ARRAY_LENGTH; i++) {
-        for (unsigned int j = 0; j < ARRAY_LENGTH; j++) {
+    for (unsigned int i = 0; i < ARRAY_LENGTH; i++)
+    {
+        for (unsigned int j = 0; j < ARRAY_LENGTH; j++)
+        {
             wall_arr[i][j] &= ~CHECKED;
         }
     }

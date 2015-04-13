@@ -198,11 +198,11 @@ void go()
         straight();
         if(count % one_square_delay() == 0)
         {
+            gradual_stop();
             rgb_set(WHITE);
             squares += 1;
             sprintf(buff, "sq: %d \n\r", squares);
             radio_puts(buff);
-            gradual_stop();
             set_loc();
             step();
         }
@@ -217,9 +217,9 @@ void go()
                 sprintf(buff, "wall! sq: %d \n\r", squares);
                 radio_puts(buff);
                 set_loc();
+//            calibrate_front();
                 step();
             }
-            calibrate_front();
         }
     }
     stop();
@@ -229,10 +229,10 @@ void step()
 {
     read_set_walls();
     print_wall_labyrinth_raw();
-    _delay_ms(1000);
+    _delay_ms(500);
     flood();
     print_distance_labyrinth();
-    _delay_ms(1000);
+    _delay_ms(500);
     int next_direction = get_next_direction();
     if (next_direction == LEFT)
     {
@@ -283,19 +283,19 @@ int get_next_direction()
 
 void set_loc()
 {
-    if(robot_direction == N)
+    if(n_direction() == N)
     {
         r_row -= 1;
     }
-    else if (robot_direction == S)
+    else if (n_direction() == S)
     {
         r_row += 1;
     }
-    else if (robot_direction == E)
+    else if (n_direction() == E)
     {
         r_column += 1;
     }
-    else if (robot_direction == W)
+    else if (n_direction() == W)
     {
         r_column -= 1;
     }
@@ -421,7 +421,7 @@ bool turn_if_needed()
 
 uint16_t one_square_delay()
 {
-    return 130;
+    return 125;
 }
 
 bool wall()

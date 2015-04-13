@@ -9,13 +9,13 @@
 #ifndef LABYRINTH_H_
 #define LABYRINTH_H_
 
-#define ARRAY_LENGTH 12
+#define ARRAY_LENGTH 7
 #define NWall 1
 #define EWall 2
 #define SWall 4
 #define WWall 8
-#define GOAL_ROW 5
-#define GOAL_COLUMN 5
+#define GOAL_ROW 3
+#define GOAL_COLUMN 2
 #define NOT_VISITED 0
 extern int r_row;
 extern int r_column;
