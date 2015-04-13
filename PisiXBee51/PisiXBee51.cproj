@@ -189,6 +189,12 @@
     <Compile Include="drivers\motor.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="labyrinth.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="labyrinth.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
