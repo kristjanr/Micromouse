@@ -250,28 +250,28 @@ void step()
 
 int get_next_direction()
 {
-    if(n_row < r_row && n_column == r_column) // go to north
+    if(n_row < r_row && n_column == r_column) // go north
     {
         if (n_direction() == N) return FORWARD;
         if (n_direction() == E) return LEFT;
         if (n_direction() == S) return BACKWARD;
         if (n_direction() == W) return RIGHT;
     }
-    if(n_row == r_row && n_column > r_column) // go to east
+    if(n_row == r_row && n_column > r_column) // go east
     {
         if (n_direction() == N) return RIGHT;
         if (n_direction() == E) return FORWARD;
         if (n_direction() == S) return LEFT;
         if (n_direction() == W) return BACKWARD;
     }
-    if(n_row > r_row && n_column == r_column) // go to south
+    if(n_row > r_row && n_column == r_column) // go south
     {
         if (n_direction() == N) return BACKWARD;
         if (n_direction() == E) return RIGHT;
         if (n_direction() == S) return FORWARD;
         if (n_direction() == W) return LEFT;
     }
-    if(n_row == r_row && n_column < r_column) // go to west
+    if(n_row == r_row && n_column < r_column) // go west
     {
         if (n_direction() == N) return LEFT;
         if (n_direction() == E) return BACKWARD;

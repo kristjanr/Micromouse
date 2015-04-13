@@ -7,8 +7,10 @@
 #include "labyrinth.h"
 #define CHECKED 16
 int highest_neighbouring_square(unsigned int, unsigned int);
-int get_neighbour(unsigned int, unsigned int);
+int get_neighbour(int, int);
 int max(int a[], int num_elements);
+void set_next_square();
+#define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
 
 void build_labyrinth()
 {
@@ -35,6 +37,13 @@ void build_labyrinth()
             }
         }
     }
+}
+
+void flood()
+{
+    unsigned int count = 0;
+
+    // reset distance array
     for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
     {
         for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
@@ -44,11 +53,7 @@ void build_labyrinth()
     }
     distance_arr[GOAL_ROW][GOAL_COLUMN] = 0;
     wall_arr[GOAL_ROW][GOAL_COLUMN] = CHECKED;
-}
 
-void flood()
-{
-    unsigned int count = 0;
     while (1)
     {
         count += 1;
@@ -73,6 +78,12 @@ void flood()
         }
     }
     set_next_square();
+    // reset wall array to not checked
+    for (unsigned int i = 0; i < ARRAY_LENGTH; i++) {
+        for (unsigned int j = 0; j < ARRAY_LENGTH; j++) {
+            wall_arr[i][j] &= ~CHECKED;
+        }
+    }
 }
 
 int highest_neighbouring_square(unsigned int row, unsigned int column)
@@ -146,7 +157,7 @@ void set_next_square()
     }
 }
 
-int get_neighbour(unsigned int row, unsigned int column)
+int get_neighbour(int row, int column)
 {
     if (row < 0 || column < 0 || row > ARRAY_LENGTH -1 || column > ARRAY_LENGTH -1)
     {
