@@ -313,19 +313,19 @@ void read_set_walls()
 
 void add_front_wall_info()
 {
-    if (robot_direction == N)
+    if (n_direction() == N)
     {
         wall_arr[r_row][r_column] |= NWall;
     }
-    else if (robot_direction == E)
+    else if (n_direction() == E)
     {
         wall_arr[r_row][r_column] |= EWall;
     }
-    else if (robot_direction == S)
+    else if (n_direction() == S)
     {
         wall_arr[r_row][r_column] |= SWall;
     }
-    else if (robot_direction == W)
+    else if (n_direction() == W)
     {
         wall_arr[r_row][r_column] |= WWall;
     }
@@ -333,19 +333,19 @@ void add_front_wall_info()
 
 void add_right_wall_info()
 {
-    if (robot_direction == N)
+    if (n_direction() == N)
     {
         wall_arr[r_row][r_column] |= EWall;
     }
-    else if (robot_direction == E)
+    else if (n_direction() == E)
     {
         wall_arr[r_row][r_column] |= SWall;
     }
-    else if (robot_direction == S)
+    else if (n_direction() == S)
     {
         wall_arr[r_row][r_column] |= WWall;
     }
-    else if (robot_direction == W)
+    else if (n_direction() == W)
     {
         wall_arr[r_row][r_column] |= NWall;
     }
@@ -353,19 +353,19 @@ void add_right_wall_info()
 
 void add_left_wall_info()
 {
-    if (robot_direction == N)
+    if (n_direction() == N)
     {
         wall_arr[r_row][r_column] |= WWall;
     }
-    else if (robot_direction == E)
+    else if (n_direction() == E)
     {
         wall_arr[r_row][r_column] |= NWall;
     }
-    else if (robot_direction == S)
+    else if (n_direction() == S)
     {
         wall_arr[r_row][r_column] |= EWall;
     }
-    else if (robot_direction == W)
+    else if (n_direction() == W)
     {
         wall_arr[r_row][r_column] |= SWall;
     }
