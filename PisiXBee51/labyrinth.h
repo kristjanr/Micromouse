@@ -18,14 +18,14 @@
 #define SWall 4
 #define WWall 8
 #define NOT_VISITED 0
-extern int r_row;
-extern int r_column;
-int n_row;
-int n_column;
+extern int CurrentRow;
+extern int CurrentColumn;
+int NextRow;
+int NextColumn;
 
 void flood();
-int wall_arr[ARRAY_LENGTH][ARRAY_LENGTH];
-int distance_arr[ARRAY_LENGTH][ARRAY_LENGTH];
+int Walls[ARRAY_LENGTH][ARRAY_LENGTH];
+int Distances[ARRAY_LENGTH][ARRAY_LENGTH];
 
 void build_labyrinth();
 

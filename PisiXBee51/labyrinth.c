@@ -18,22 +18,22 @@ void build_labyrinth()
     {
         for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
         {
-            wall_arr[row][column] = NOT_VISITED;
+            Walls[row][column] = NOT_VISITED;
             if (row == 0)
             {
-                wall_arr[row][column] |= NWall;
+                Walls[row][column] |= NWall;
             }
             if (row == ARRAY_LENGTH - 1)
             {
-                wall_arr[row][column] |= SWall;
+                Walls[row][column] |= SWall;
             }
             if (column == 0)
             {
-                wall_arr[row][column] |= WWall;
+                Walls[row][column] |= WWall;
             }
             if (column == ARRAY_LENGTH - 1)
             {
-                wall_arr[row][column] |= EWall;
+                Walls[row][column] |= EWall;
             }
         }
     }
@@ -48,11 +48,11 @@ void flood()
     {
         for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
         {
-            distance_arr[row][column] = -1;
+            Distances[row][column] = -1;
         }
     }
-    distance_arr[GOAL_ROW][GOAL_COLUMN] = 0;
-    wall_arr[GOAL_ROW][GOAL_COLUMN] = CHECKED;
+    Distances[GOAL_ROW][GOAL_COLUMN] = 0;
+    Walls[GOAL_ROW][GOAL_COLUMN] = CHECKED;
 
     while (1)
     {
@@ -61,18 +61,18 @@ void flood()
         {
             for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
             {
-                if (wall_arr[row][column] & CHECKED)
+                if (Walls[row][column] & CHECKED)
                 {
                     continue;
                 }
                 if (highest_neighbouring_square(row, column) == (count -1))
                 {
-                    distance_arr[row][column] = count;
-                    wall_arr[row][column] |= CHECKED;
+                    Distances[row][column] = count;
+                    Walls[row][column] |= CHECKED;
                 }
             }
         }
-        if (wall_arr[0][0] & CHECKED)
+        if (Walls[0][0] & CHECKED)
         {
             break;
         }
@@ -83,7 +83,7 @@ void flood()
     {
         for (unsigned int j = 0; j < ARRAY_LENGTH; j++)
         {
-            wall_arr[i][j] &= ~CHECKED;
+            Walls[i][j] &= ~CHECKED;
         }
     }
 }
@@ -94,19 +94,19 @@ int highest_neighbouring_square(unsigned int row, unsigned int column)
     int south = -1;
     int west = -1;
     int east = -1;
-    if (!(wall_arr[row][column] & NWall))
+    if (!(Walls[row][column] & NWall))
     {
         north = get_neighbour(row - 1, column);
     }
-    if (!(wall_arr[row][column] & SWall))
+    if (!(Walls[row][column] & SWall))
     {
         south = get_neighbour(row + 1, column);
     }
-    if (!(wall_arr[row][column] & WWall))
+    if (!(Walls[row][column] & WWall))
     {
         west = get_neighbour(row, column - 1);
     }
-    if (!(wall_arr[row][column] & EWall))
+    if (!(Walls[row][column] & EWall))
     {
         east = get_neighbour(row, column + 1);
     }
@@ -116,46 +116,49 @@ int highest_neighbouring_square(unsigned int row, unsigned int column)
 
 void set_next_square()
 {
-    int current_square_value = distance_arr[r_row][r_column];
+    int current_square_value = Distances[CurrentRow][CurrentColumn];
     int north = -1;
     int south = -1;
     int west = -1;
     int east = -1;
-    if (!(wall_arr[r_row][r_column] & NWall))
+    if (!(Walls[CurrentRow][CurrentColumn] & NWall))
     {
-        north = get_neighbour(r_row - 1, r_column);
+        north = get_neighbour(CurrentRow - 1, CurrentColumn);
     }
-    if (!(wall_arr[r_row][r_column] & SWall))
+    if (!(Walls[CurrentRow][CurrentColumn] & SWall))
     {
-        south = get_neighbour(r_row + 1, r_column);
+        south = get_neighbour(CurrentRow + 1, CurrentColumn);
     }
-    if (!(wall_arr[r_row][r_column] & WWall))
+    if (!(Walls[CurrentRow][CurrentColumn] & WWall))
     {
-        west = get_neighbour(r_row, r_column - 1);
+        west = get_neighbour(CurrentRow, CurrentColumn - 1);
     }
-    if (!(wall_arr[r_row][r_column] & EWall))
+    if (!(Walls[CurrentRow][CurrentColumn] & EWall))
     {
-        east = get_neighbour(r_row, r_column + 1);
+        east = get_neighbour(CurrentRow, CurrentColumn + 1);
     }
+
     if (north == current_square_value -1)
     {
-        n_row = r_row -1;
-        n_column = r_column;
+        NextRow = CurrentRow -1;
+        NextColumn = CurrentColumn;
     }
-    else if (south == current_square_value -1)
+
+     if (south == current_square_value -1)
     {
-        n_row = r_row +1;
-        n_column = r_column;
+        NextRow = CurrentRow +1;
+        NextColumn = CurrentColumn;
     }
-    else if (west == current_square_value -1)
+
+     if (west == current_square_value -1)
     {
-        n_row = r_row;
-        n_column = r_column - 1;
+        NextRow = CurrentRow;
+        NextColumn = CurrentColumn - 1;
     }
-    else if (east == current_square_value -1)
+    if (east == current_square_value -1)
     {
-        n_row = r_row;
-        n_column = r_column + 1;
+        NextRow = CurrentRow;
+        NextColumn = CurrentColumn + 1;
     }
 }
 
@@ -165,7 +168,7 @@ int get_neighbour(int row, int column)
     {
         return -1;
     }
-    return distance_arr[row][column];
+    return Distances[row][column];
 }
 
 int max(int a[], int num_elements)

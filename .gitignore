@@ -38,3 +38,6 @@
 *.atsuo
 *.atsln
 .idea
+*.d
+PisiXBee51/Debug/Makefile
+PisiXBee51/Debug/makedep.mk

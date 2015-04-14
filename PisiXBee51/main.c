@@ -22,9 +22,9 @@ int n_direction();
 #define S 180
 #define W -90
 int robot_direction = E;
-void send_direction();
-int r_column = 0;
-int r_row = 0;
+void print_direction();
+int CurrentColumn = 0;
+int CurrentRow = 0;
 void set_loc();
 void read_set_walls();
 void add_front_wall_info();
@@ -61,7 +61,7 @@ void turn(int);
 
 void motors();
 void straight();
-void go();
+void mapping_run();
 void stop();
 void turn_around();
 bool wall();
@@ -72,11 +72,11 @@ void gradual_stop();
 int turns = 0;
 #define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
 int turns_array[] = {RIGHT, 0, 0, 0, 0, LEFT, RIGHT, LEFT, 0, LEFT, 0, RIGHT, LEFT, LEFT, RIGHT, LEFT, LEFT, RIGHT, 0, 0};
-bool turn_if_needed();
+void turn_if_needed();
 
 char buff[100];
 void print_wall_labyrinth();
-void print_wall_labyrinth_raw();
+void print_wall_labyrinth();
 
 void print_distance_labyrinth();
 void send_debug_msg();
@@ -98,7 +98,7 @@ int main(void)
         {
             rgb_set(OFF);
             _delay_ms(1000);
-            go();
+            mapping_run();
         }
         _delay_ms(500);
         send_debug_msg(buff);
@@ -107,26 +107,10 @@ int main(void)
     return 0;
 }
 
-void send_direction()
+void print_direction()
 {
     sprintf(buff, "direction %d \n\r", n_direction());
     radio_puts(buff);
-}
-
-void print_wall_labyrinth_raw()
-{
-    sprintf(buff, "\n\r Printing wall labyrinth raw: \n\r");
-    radio_puts(buff);
-    for (int row = 0; row < ARRAY_LENGTH; row++)
-    {
-        for (int column = 0; column < ARRAY_LENGTH; column++)
-        {
-            sprintf(buff, "%d ", wall_arr[row][column]);
-            radio_puts(buff);
-        }
-        sprintf(buff, "\n\r");
-        radio_puts(buff);
-    }
 }
 
 void print_wall_labyrinth()
@@ -137,28 +121,8 @@ void print_wall_labyrinth()
     {
         for (int column = 0; column < ARRAY_LENGTH; column++)
         {
-            int wall = wall_arr[row][column];
-            if (wall & 8 && wall & 4)
-            {
-                sprintf(buff, "%c", '|');
-                radio_puts(buff);
-                sprintf(buff, "%c", '_');
-                radio_puts(buff);
-            }
-            else if (wall & 8)
-            {
-                sprintf(buff, "%c", '|');
-                radio_puts(buff);
-                printf(buff, "%c", ' ');
-                radio_puts(buff);
-            }
-            else if (wall & 4)
-            {
-                sprintf(buff, "%c", ' ');
-                radio_puts(buff);
-                printf(buff, "%c", '_');
-                radio_puts(buff);
-            }
+            sprintf(buff, "%d ", Walls[row][column]);
+            radio_puts(buff);
         }
         sprintf(buff, "\n\r");
         radio_puts(buff);
@@ -173,7 +137,7 @@ void print_distance_labyrinth()
     {
         for (int column = 0; column < ARRAY_LENGTH; column++)
         {
-            sprintf(buff, "%d ", distance_arr[row][column]);
+            sprintf(buff, "%d ", Distances[row][column]);
             radio_puts(buff);
         }
         sprintf(buff, "\n\r");
@@ -181,12 +145,12 @@ void print_distance_labyrinth()
     }
 }
 
-void go()
+void mapping_run()
 {
     int32_t count = 0;
     int squares = 1;
     step();
-    while(!sw1_read()) //turns < NELEMS(turns_array)
+    while(!sw1_read() || (CurrentRow == GOAL_ROW && CurrentColumn == GOAL_COLUMN))
     {
         _delay_ms(5);
         count ++;
@@ -217,7 +181,7 @@ void go()
                 sprintf(buff, "wall! sq: %d \n\r", squares);
                 radio_puts(buff);
                 set_loc();
-//            calibrate_front();
+//              calibrate_front();
                 step();
             }
         }
@@ -228,50 +192,38 @@ void go()
 void step()
 {
     read_set_walls();
-    print_wall_labyrinth_raw();
+    print_wall_labyrinth();
     _delay_ms(500);
     flood();
     print_distance_labyrinth();
     _delay_ms(500);
-    int next_direction = get_next_direction();
-    if (next_direction == LEFT)
-    {
-        turn(LEFT);
-    }
-    else if (next_direction == RIGHT)
-    {
-        turn(RIGHT);
-    }
-    else if (next_direction == BACKWARD)
-    {
-        turn_around();
-    }
+    turn_if_needed();
 }
 
 int get_next_direction()
 {
-    if(n_row < r_row && n_column == r_column) // go north
+    if(NextRow < CurrentRow && NextColumn == CurrentColumn) // go north
     {
         if (n_direction() == N) return FORWARD;
         if (n_direction() == E) return LEFT;
         if (n_direction() == S) return BACKWARD;
         if (n_direction() == W) return RIGHT;
     }
-    if(n_row == r_row && n_column > r_column) // go east
+    if(NextRow == CurrentRow && NextColumn > CurrentColumn) // go east
     {
         if (n_direction() == N) return RIGHT;
         if (n_direction() == E) return FORWARD;
         if (n_direction() == S) return LEFT;
         if (n_direction() == W) return BACKWARD;
     }
-    if(n_row > r_row && n_column == r_column) // go south
+    if(NextRow > CurrentRow && NextColumn == CurrentColumn) // go south
     {
         if (n_direction() == N) return BACKWARD;
         if (n_direction() == E) return RIGHT;
         if (n_direction() == S) return FORWARD;
         if (n_direction() == W) return LEFT;
     }
-    if(n_row == r_row && n_column < r_column) // go west
+    if(NextRow == CurrentRow && NextColumn < CurrentColumn) // go west
     {
         if (n_direction() == N) return LEFT;
         if (n_direction() == E) return BACKWARD;
@@ -285,19 +237,19 @@ void set_loc()
 {
     if(n_direction() == N)
     {
-        r_row -= 1;
+        CurrentRow -= 1;
     }
     else if (n_direction() == S)
     {
-        r_row += 1;
+        CurrentRow += 1;
     }
     else if (n_direction() == E)
     {
-        r_column += 1;
+        CurrentColumn += 1;
     }
     else if (n_direction() == W)
     {
-        r_column -= 1;
+        CurrentColumn -= 1;
     }
 }
 
@@ -315,19 +267,19 @@ void add_front_wall_info()
 {
     if (n_direction() == N)
     {
-        wall_arr[r_row][r_column] |= NWall;
+        Walls[CurrentRow][CurrentColumn] |= NWall;
     }
     else if (n_direction() == E)
     {
-        wall_arr[r_row][r_column] |= EWall;
+        Walls[CurrentRow][CurrentColumn] |= EWall;
     }
     else if (n_direction() == S)
     {
-        wall_arr[r_row][r_column] |= SWall;
+        Walls[CurrentRow][CurrentColumn] |= SWall;
     }
     else if (n_direction() == W)
     {
-        wall_arr[r_row][r_column] |= WWall;
+        Walls[CurrentRow][CurrentColumn] |= WWall;
     }
 }
 
@@ -335,19 +287,19 @@ void add_right_wall_info()
 {
     if (n_direction() == N)
     {
-        wall_arr[r_row][r_column] |= EWall;
+        Walls[CurrentRow][CurrentColumn] |= EWall;
     }
     else if (n_direction() == E)
     {
-        wall_arr[r_row][r_column] |= SWall;
+        Walls[CurrentRow][CurrentColumn] |= SWall;
     }
     else if (n_direction() == S)
     {
-        wall_arr[r_row][r_column] |= WWall;
+        Walls[CurrentRow][CurrentColumn] |= WWall;
     }
     else if (n_direction() == W)
     {
-        wall_arr[r_row][r_column] |= NWall;
+        Walls[CurrentRow][CurrentColumn] |= NWall;
     }
 }
 
@@ -355,19 +307,19 @@ void add_left_wall_info()
 {
     if (n_direction() == N)
     {
-        wall_arr[r_row][r_column] |= WWall;
+        Walls[CurrentRow][CurrentColumn] |= WWall;
     }
     else if (n_direction() == E)
     {
-        wall_arr[r_row][r_column] |= NWall;
+        Walls[CurrentRow][CurrentColumn] |= NWall;
     }
     else if (n_direction() == S)
     {
-        wall_arr[r_row][r_column] |= EWall;
+        Walls[CurrentRow][CurrentColumn] |= EWall;
     }
     else if (n_direction() == W)
     {
-        wall_arr[r_row][r_column] |= SWall;
+        Walls[CurrentRow][CurrentColumn] |= SWall;
     }
 }
 
@@ -392,30 +344,20 @@ int n_direction()
 }
 
 
-bool turn_if_needed()
+void turn_if_needed()
 {
-    sprintf(buff, "turns before: %d \n\r", turns);
-    radio_puts(buff);
-    if (get_left() < 80 && turns_array[turns] == LEFT)
+    int next_direction = get_next_direction();
+    if (next_direction == LEFT)
     {
         turn(LEFT);
-        turns += 1;
-        return true;
     }
-    else if (get_right() < 80 && turns_array[turns] == RIGHT)
+    else if (next_direction == RIGHT)
     {
         turn(RIGHT);
-        turns += 1;
-        return true;
     }
-    else if (get_left() < 80 || get_right() < 80)
+    else if (next_direction == BACKWARD)
     {
-        turns += 1;
-        return false;
-    }
-    else
-    {
-        return false;
+        turn_around();
     }
 }
 
@@ -521,7 +463,7 @@ void turn(int direction)
         robot_direction = n_direction() + LEFT_DIRECTION;
     }
     _delay_ms(300);
-    send_direction();
+    print_direction();
     motor_set(0,0);
     _delay_ms(50);
 }
@@ -532,7 +474,7 @@ void turn_around()
     motor_set(500, -500);
     _delay_ms(700);
     robot_direction = n_direction() + 180;
-    send_direction();
+    print_direction();
     stop();
     _delay_ms(10);
 }
@@ -607,4 +549,5 @@ uint16_t get_right()
 {
     return adc_read(RIGHT_S);
 }
+
 
