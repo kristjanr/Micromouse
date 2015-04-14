@@ -71,7 +71,6 @@ void gradual_stop();
 
 int turns = 0;
 #define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
-int turns_array[] = {RIGHT, 0, 0, 0, 0, LEFT, RIGHT, LEFT, 0, LEFT, 0, RIGHT, LEFT, LEFT, RIGHT, LEFT, LEFT, RIGHT, 0, 0};
 void turn_if_needed();
 
 char buff[100];
@@ -104,6 +103,7 @@ int main(void)
         send_debug_msg(buff);
     }
     rgb_set(PINK);
+    
     return 0;
 }
 
@@ -147,7 +147,7 @@ void print_distance_labyrinth()
 
 void mapping_run()
 {
-    int32_t count = 0;
+    int count = 0;
     int squares = 1;
     step();
     while(!sw1_read() || (CurrentRow == GOAL_ROW && CurrentColumn == GOAL_COLUMN))
@@ -160,7 +160,7 @@ void mapping_run()
         //send_debug_msg(buff);
         //}
         straight();
-        if(count % one_square_delay() == 0)
+        if(count % one_square_delay() == 0 && get_front_left()  < 35 && get_front_right() < 35)
         {
             gradual_stop();
             rgb_set(WHITE);
@@ -174,16 +174,14 @@ void mapping_run()
         {
             rgb_set(RED);
             gradual_stop();
-            if(count % one_square_delay() > one_square_delay() - 40)
-            {
-                count = 0;
-                squares += 1;
-                sprintf(buff, "wall! sq: %d \n\r", squares);
-                radio_puts(buff);
-                set_loc();
-//              calibrate_front();
-                step();
-            }
+            sprintf(buff, "wall! count: %d \n\r", count);
+            radio_puts(buff);
+            count = 0;
+            squares += 1;
+            sprintf(buff, "sq: %d \n\r", squares);
+            radio_puts(buff);
+            set_loc();
+            step();
         }
     }
     stop();
@@ -192,11 +190,7 @@ void mapping_run()
 void step()
 {
     read_set_walls();
-    print_wall_labyrinth();
-    _delay_ms(500);
     flood();
-    print_distance_labyrinth();
-    _delay_ms(500);
     turn_if_needed();
 }
 
@@ -251,6 +245,8 @@ void set_loc()
     {
         CurrentColumn -= 1;
     }
+	sprintf(buff, "Row: %d, Column: %d \n\r", CurrentRow, CurrentColumn);
+	radio_puts(buff);
 }
 
 void read_set_walls()
@@ -261,6 +257,7 @@ void read_set_walls()
     if (get_right() > 80) add_right_wall_info();
     // read left wall
     if (get_left() > 80) add_left_wall_info();
+    Walls[CurrentRow][CurrentColumn] |= Visited;
 }
 
 void add_front_wall_info()
@@ -363,7 +360,7 @@ void turn_if_needed()
 
 uint16_t one_square_delay()
 {
-    return 125;
+    return 140;
 }
 
 bool wall()
@@ -472,7 +469,7 @@ void turn_around()
 {
     // -500 and 500 for 720ms does 180 degrees
     motor_set(500, -500);
-    _delay_ms(700);
+    _delay_ms(650);
     robot_direction = n_direction() + 180;
     print_direction();
     stop();

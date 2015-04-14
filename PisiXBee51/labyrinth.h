@@ -17,6 +17,7 @@
 #define EWall 2
 #define SWall 4
 #define WWall 8
+#define Visited 32
 #define NOT_VISITED 0
 extern int CurrentRow;
 extern int CurrentColumn;
