@@ -127,8 +127,15 @@ int main(void)
             rgb_set(OFF);
             _delay_ms(1000);
             step();
+            /*mapping_run();
+            sprintf(buff, "Going back! \n\r");
+            radio_puts(buff);
+            _delay_ms(1000);
+            GOAL_COLUMN = 0;
+            GOAL_ROW = 0;
+            step();
             mapping_run();
-            /*
+            */
             while (1)
             {
                 if (radio_available())
@@ -147,7 +154,7 @@ int main(void)
                     }
                 }
             }
-            */
+
         }
         _delay_ms(1000);
         send_debug_msg(buff);
@@ -184,7 +191,7 @@ void mapping_run()
             radio_puts(buff);
             set_loc();
             step();
-            //break;
+            break;
             //_delay_ms(2000);
         }
     }
@@ -367,7 +374,7 @@ void turn_if_needed()
 
 uint16_t one_square_delay()
 {
-    return 132;
+    return 133;
 }
 
 bool wall()

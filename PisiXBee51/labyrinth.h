@@ -10,8 +10,8 @@
 #define LABYRINTH_H_
 
 #define ARRAY_LENGTH 7 // 12
-#define GOAL_ROW 6 // 5
-#define GOAL_COLUMN 6 // 5
+extern int GOAL_ROW; // 5
+extern int GOAL_COLUMN; // 5
 
 #define NWall 1
 #define EWall 2

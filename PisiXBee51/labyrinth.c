@@ -11,6 +11,8 @@ int get_neighbour(int, int);
 int max(int a[], int num_elements);
 void set_next_square();
 #define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
+int GOAL_ROW = 6; // 5
+int GOAL_COLUMN = 6; // 5
 
 void build_labyrinth()
 {
@@ -52,7 +54,7 @@ void flood()
         }
     }
     Distances[GOAL_ROW][GOAL_COLUMN] = 0;
-    Walls[GOAL_ROW][GOAL_COLUMN] = CHECKED;
+    Walls[GOAL_ROW][GOAL_COLUMN] |= CHECKED;
     int all_checked = 0;
     while (!all_checked)
     {
@@ -77,13 +79,6 @@ void flood()
                 }
             }
         }
-
-        /*
-        if (Walls[0][0] & CHECKED && Walls[ARRAY_LENGTH-1][0] & CHECKED && Walls[0][ARRAY_LENGTH-1] & CHECKED && Walls[ARRAY_LENGTH-1][ARRAY_LENGTH-1] & CHECKED)
-        {
-            break;
-        }
-        */
     }
     set_next_square();
     // reset wall array to not checked
