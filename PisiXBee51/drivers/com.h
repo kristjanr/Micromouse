@@ -18,6 +18,8 @@
 #define RADIO_USART_RXC_vect USARTE0_RXC_vect
 #define RADIO_USART_DRE_vect USARTE0_DRE_vect
 
+extern uint8_t noPrint;
+
 // Initialize radio with 32 char Tx/Rx buffer
 void radio_init(uint32_t baud);
 
@@ -39,5 +41,7 @@ int radio_getc_nolock();
 // 0 terminates
 int radio_gets(char* stringPtr);
 
+// Check if we have data in RX buffer
+int radio_available();
 
 #endif /* COM_H_ */
