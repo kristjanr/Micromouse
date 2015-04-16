@@ -125,16 +125,16 @@ int main(void)
         if (sw2_read())
         {
             rgb_set(OFF);
+            _delay_ms(1000);
             step();
-
+            mapping_run();
+            /*
             while (1)
             {
                 if (radio_available())
                 {
                     char temp = radio_getc();
-                    radio_putc(temp);    // Mirror back data received and processed
-
-                    // Process received data
+                    radio_putc(temp);
                     if (temp == 'g')
                     {
                         rgb_set(PINK);
@@ -147,8 +147,9 @@ int main(void)
                     }
                 }
             }
+            */
         }
-        _delay_ms(100);
+        _delay_ms(1000);
         send_debug_msg(buff);
     }
     return 0;
@@ -163,11 +164,6 @@ void mapping_run()
     {
         _delay_ms(5);
         count++;
-        // with this debug message sending, the one square delay is 130. Without: 140
-        //if (count % 10 == 0)
-        //{
-        //send_debug_msg(buff);
-        //}
         straight();
         if (count % one_square_delay() == 0)
         {
@@ -188,6 +184,7 @@ void mapping_run()
             radio_puts(buff);
             set_loc();
             step();
+            //break;
             //_delay_ms(2000);
         }
     }
@@ -197,11 +194,11 @@ void mapping_run()
 void step()
 {
     read_set_walls();
-    //print_wall_labyrinth();
+    print_wall_labyrinth();
     flood();
-    //print_distance_labyrinth();
+    print_distance_labyrinth();
     turn_if_needed();
-    //print_direction();
+    print_direction();
 }
 
 int get_next_direction()
@@ -264,9 +261,9 @@ void read_set_walls()
     // read front wall
     if (get_front_left() > 40 && get_front_right() > 35) add_front_wall_info();
     // read right wall
-    if (get_right() > 80) add_right_wall_info();
+    if (get_right() > 60) add_right_wall_info();
     // read left wall
-    if (get_left() > 80) add_left_wall_info();
+    if (get_left() > 60) add_left_wall_info();
     Walls[CurrentRow][CurrentColumn] |= Visited;
 }
 
@@ -413,19 +410,20 @@ void straight()
     {
         rgb_set(GREEN);
         diag_diff = 0;
+        motors(SPEED, SPEED);
     }
     else if (left_wall)
     {
         rgb_set(BLUE);
-
-        diag_diff = ld - 42;
+        diag_diff = (ld - 42)*4;
+        motors(SPEED + diag_diff, SPEED - diag_diff);
     }
     else if (right_wall)
     {
         rgb_set(RED);
-        diag_diff = 42 - rd;
+        diag_diff = (38 - rd)*4;
+        motors(SPEED + diag_diff, SPEED - diag_diff);
     }
-    motors(SPEED + diag_diff * 4, SPEED - diag_diff * 4);
 }
 
 void motors(int16_t l_speed, int16_t r_speed)
@@ -450,8 +448,8 @@ void motors(int16_t l_speed, int16_t r_speed)
     // correct the slight curving to right
     if (l_speed != 0 && r_speed != 0)
     {
-        if (l_speed > 0) l_speed = l_speed - 12;
-        else l_speed = l_speed + 12;
+        if (l_speed > 0) l_speed = l_speed - 10;
+        else l_speed = l_speed + 10;
     }
 
     motor_set(l_speed, r_speed);
