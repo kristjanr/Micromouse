@@ -103,46 +103,8 @@ int main(void)
         send_debug_msg(buff);
     }
     rgb_set(PINK);
-    
+
     return 0;
-}
-
-void print_direction()
-{
-    sprintf(buff, "direction %d \n\r", n_direction());
-    radio_puts(buff);
-}
-
-void print_wall_labyrinth()
-{
-    sprintf(buff, "\n\r Printing wall labyrinth: \n\r");
-    radio_puts(buff);
-    for (int row = 0; row < ARRAY_LENGTH; row++)
-    {
-        for (int column = 0; column < ARRAY_LENGTH; column++)
-        {
-            sprintf(buff, "%d ", Walls[row][column]);
-            radio_puts(buff);
-        }
-        sprintf(buff, "\n\r");
-        radio_puts(buff);
-    }
-}
-
-void print_distance_labyrinth()
-{
-    sprintf(buff, "\n\r Printing distance labyrinth: \n\r");
-    radio_puts(buff);
-    for (int row = 0; row < ARRAY_LENGTH; row++)
-    {
-        for (int column = 0; column < ARRAY_LENGTH; column++)
-        {
-            sprintf(buff, "%d ", Distances[row][column]);
-            radio_puts(buff);
-        }
-        sprintf(buff, "\n\r");
-        radio_puts(buff);
-    }
 }
 
 void mapping_run()
@@ -160,7 +122,7 @@ void mapping_run()
         //send_debug_msg(buff);
         //}
         straight();
-        if(count % one_square_delay() == 0 && get_front_left()  < 35 && get_front_right() < 35)
+        if(count % one_square_delay() == 0 && get_front_left() < 35 && get_front_right() < 35)
         {
             gradual_stop();
             rgb_set(WHITE);
@@ -190,8 +152,15 @@ void mapping_run()
 void step()
 {
     read_set_walls();
+    _delay_ms(2000);
+    print_wall_labyrinth();
+    _delay_ms(2000);
     flood();
+    _delay_ms(2000);
+    print_distance_labyrinth();
     turn_if_needed();
+    _delay_ms(2000);
+    print_direction();
 }
 
 int get_next_direction()
@@ -245,8 +214,8 @@ void set_loc()
     {
         CurrentColumn -= 1;
     }
-	sprintf(buff, "Row: %d, Column: %d \n\r", CurrentRow, CurrentColumn);
-	radio_puts(buff);
+    sprintf(buff, "Row: %d, Column: %d \n\r", CurrentRow, CurrentColumn);
+    radio_puts(buff);
 }
 
 void read_set_walls()
@@ -360,7 +329,7 @@ void turn_if_needed()
 
 uint16_t one_square_delay()
 {
-    return 140;
+    return 125;
 }
 
 bool wall()
@@ -469,11 +438,11 @@ void turn_around()
 {
     // -500 and 500 for 720ms does 180 degrees
     motor_set(500, -500);
-    _delay_ms(650);
+    _delay_ms(700);
+    stop();
     robot_direction = n_direction() + 180;
     print_direction();
-    stop();
-    _delay_ms(10);
+    _delay_ms(50);
 }
 
 void stop()
@@ -547,4 +516,41 @@ uint16_t get_right()
     return adc_read(RIGHT_S);
 }
 
+void print_direction()
+{
+    sprintf(buff, "direction %d \n\r", n_direction());
+    radio_puts(buff);
+}
+
+void print_wall_labyrinth()
+{
+    sprintf(buff, "\n\r Printing wall labyrinth: \n\r");
+    radio_puts(buff);
+    for (int row = 0; row < ARRAY_LENGTH; row++)
+    {
+        for (int column = 0; column < ARRAY_LENGTH; column++)
+        {
+            sprintf(buff, "%d ", Walls[row][column]);
+            radio_puts(buff);
+        }
+        sprintf(buff, "\n\r");
+        radio_puts(buff);
+    }
+}
+
+void print_distance_labyrinth()
+{
+    sprintf(buff, "\n\r Printing distance labyrinth: \n\r");
+    radio_puts(buff);
+    for (int row = 0; row < ARRAY_LENGTH; row++)
+    {
+        for (int column = 0; column < ARRAY_LENGTH; column++)
+        {
+            sprintf(buff, "%d ", Distances[row][column]);
+            radio_puts(buff);
+        }
+        sprintf(buff, "\n\r");
+        radio_puts(buff);
+    }
+}
 
