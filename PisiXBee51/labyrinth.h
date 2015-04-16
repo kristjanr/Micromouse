@@ -27,7 +27,7 @@ int NextColumn;
 void flood();
 int Walls[ARRAY_LENGTH][ARRAY_LENGTH];
 int Distances[ARRAY_LENGTH][ARRAY_LENGTH];
-
+void set_next_square();
 void build_labyrinth();
 
 

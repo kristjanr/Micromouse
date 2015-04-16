@@ -1,0 +1,7 @@
+todo:
+
+- kui esisein siis tõmba lähedale : feilis, ei tee
+- gradual start: tehtud
+- leia teekond tagasi pärast mäppimist: done
+- unvisited ruutudele seinad ümber pärast mäppimist: TEHA!
+- uuenda ka naaberseinu (optional): done
