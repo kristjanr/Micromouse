@@ -53,9 +53,10 @@ void flood()
     }
     Distances[GOAL_ROW][GOAL_COLUMN] = 0;
     Walls[GOAL_ROW][GOAL_COLUMN] = CHECKED;
-
-    while (1)
+    int all_checked = 0;
+    while (!all_checked)
     {
+        all_checked = 1;
         count += 1;
         for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
         {
@@ -65,6 +66,10 @@ void flood()
                 {
                     continue;
                 }
+                else
+                {
+                    all_checked  = 0;
+                }
                 if (highest_neighbouring_square(row, column) == (count -1))
                 {
                     Distances[row][column] = count;
@@ -72,10 +77,13 @@ void flood()
                 }
             }
         }
-        if (Walls[0][0] & CHECKED)
+
+        /*
+        if (Walls[0][0] & CHECKED && Walls[ARRAY_LENGTH-1][0] & CHECKED && Walls[0][ARRAY_LENGTH-1] & CHECKED && Walls[ARRAY_LENGTH-1][ARRAY_LENGTH-1] & CHECKED)
         {
             break;
         }
+        */
     }
     set_next_square();
     // reset wall array to not checked
@@ -144,13 +152,13 @@ void set_next_square()
         NextColumn = CurrentColumn;
     }
 
-     if (south == current_square_value -1)
+    if (south == current_square_value -1)
     {
         NextRow = CurrentRow +1;
         NextColumn = CurrentColumn;
     }
 
-     if (west == current_square_value -1)
+    if (west == current_square_value -1)
     {
         NextRow = CurrentRow;
         NextColumn = CurrentColumn - 1;
