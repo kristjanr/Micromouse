@@ -1,7 +1,9 @@
 todo:
 
-- kui esisein siis tõmba lähedale : feilis, ei tee
-- gradual start: tehtud
+- kui esisein siis tõmba lähedale : done
+- gradual start: done
 - leia teekond tagasi pärast mäppimist: done
-- unvisited ruutudele seinad ümber pärast mäppimist: TEHA!
+- unvisited ruutudele seinad ümber pärast mäppimist: done
 - uuenda ka naaberseinu (optional): done
+- fight mode & debg mode: done
+- write to eeprom: done
