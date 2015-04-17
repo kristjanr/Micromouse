@@ -81,9 +81,11 @@ int main(void)
         eeprom_read_block(Distances, (uint8_t *)1, ARRAYSIZE);
         eeprom_read_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
         rgb_set(OFF);
-        _delay_ms(500);
+        rgb_set(YELLOW);
+        put_walls_to_unvisited();
+        rgb_set(OFF);
         GOAL_COLUMN = 6;
-        GOAL_ROW = 6;
+        GOAL_ROW = 4;
         step();
         speed_run();
     }
@@ -98,9 +100,7 @@ int main(void)
         GOAL_ROW = 0;
         step();
         mapping_run();
-        //rgb_set(YELLOW);
-        //put_walls_to_unvisited();
-        //rgb_set(WHITE);
+        rgb_set(WHITE);
         eeprom_write_block(Distances, (uint8_t *)1, ARRAYSIZE);
         eeprom_write_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
         rgb_set(OFF);
@@ -330,18 +330,6 @@ void motors(int16_t l_speed, int16_t r_speed)
 void stop()
 {
     motor_set(0, 0);
-}
-
-void gradual_stop()
-{
-    int speed = SPEED;
-    int to_subtract = round(SPEED / 50);
-    while (speed > 0)
-    {
-        _delay_ms(5);
-        speed -= to_subtract;
-        motors(speed, speed);
-    }
 }
 
 int get_next_direction()

@@ -12,7 +12,7 @@ void next_square();
 int highest_neighbouring_square(unsigned int, unsigned int);
 int get_neighbour(int, int);
 int max(int a[], int num_elements);
-int GOAL_ROW = 6;
+int GOAL_ROW = 4;
 int GOAL_COLUMN = 6;
 
 void build_labyrinth()
@@ -94,9 +94,9 @@ void flood()
 
 void put_walls_to_unvisited()
 {
-    for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
+    for (int row = 0; row < ARRAY_LENGTH; row++)
     {
-        for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
+        for (int column = 0; column < ARRAY_LENGTH; column++)
         {
             if (!(Walls[row][column] & VISITED))
             {
@@ -107,7 +107,6 @@ void put_walls_to_unvisited()
             }
         }
     }
-    flood();
 }
 
 int highest_neighbouring_square(unsigned int row, unsigned int column)
