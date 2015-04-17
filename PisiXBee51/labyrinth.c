@@ -5,14 +5,15 @@
  *  Author: Kristjan Roosild
  */
 #include "labyrinth.h"
+
 #define CHECKED 16
+
+void next_square();
 int highest_neighbouring_square(unsigned int, unsigned int);
 int get_neighbour(int, int);
 int max(int a[], int num_elements);
-void set_next_square();
-#define NELEMS(x)  (sizeof(x) / sizeof(x[0]))
-int GOAL_ROW = 6; // 5
-int GOAL_COLUMN = 6; // 5
+int GOAL_ROW = 6;
+int GOAL_COLUMN = 6;
 
 void build_labyrinth()
 {
@@ -80,7 +81,7 @@ void flood()
             }
         }
     }
-    set_next_square();
+    next_square();
     // reset wall array to not checked
     for (unsigned int i = 0; i < ARRAY_LENGTH; i++)
     {
@@ -89,6 +90,24 @@ void flood()
             Walls[i][j] &= ~CHECKED;
         }
     }
+}
+
+void put_walls_to_unvisited()
+{
+    for (unsigned int row = 0; row < ARRAY_LENGTH; row++)
+    {
+        for (unsigned int column = 0; column < ARRAY_LENGTH; column++)
+        {
+            if (!(Walls[row][column] & VISITED))
+            {
+                set_wall(NWall, row, column);
+                set_wall(SWall, row, column);
+                set_wall(EWall, row, column);
+                set_wall(WWall, row, column);
+            }
+        }
+    }
+    flood();
 }
 
 int highest_neighbouring_square(unsigned int row, unsigned int column)
@@ -117,7 +136,7 @@ int highest_neighbouring_square(unsigned int row, unsigned int column)
     return max(a, 4);
 }
 
-void set_next_square()
+void next_square()
 {
     int current_square_value = Distances[CurrentRow][CurrentColumn];
     int north = -1;
