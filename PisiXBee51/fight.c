@@ -30,7 +30,7 @@
 #define RIGHT 1
 #define FORWARD 0
 #define BACKWARD -1
-#define ARRAYSIZE ARRAY_LENGTH * ARRAY_LENGTH
+#define ARRAYSIZE (ARRAY_LENGTH * ARRAY_LENGTH)
 
 void set_loc();
 void read_set_walls();
@@ -78,21 +78,21 @@ int main(void)
     if (sw1_read())
     {
         rgb_set(WHITE);
-        eeprom_read_block(Distances, (uint8_t *)1, ARRAYSIZE);
-        eeprom_read_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
-        rgb_set(OFF);
+        _delay_ms(500);
+        eeprom_read_block(Walls, (uint8_t *)1, ARRAYSIZE);
         rgb_set(YELLOW);
-        put_walls_to_unvisited();
-        rgb_set(OFF);
         GOAL_COLUMN = 6;
-        GOAL_ROW = 4;
-        step();
+        GOAL_ROW = 6;
+        flood();
+        next_square();
+        turn_if_needed();
+        rgb_set(OFF);
         speed_run();
     }
     else if (sw2_read())
     {
         rgb_set(OFF);
-        _delay_ms(1000);
+        _delay_ms(500);
         step();
         mapping_run();
         _delay_ms(100);
@@ -100,9 +100,9 @@ int main(void)
         GOAL_ROW = 0;
         step();
         mapping_run();
+        put_walls_to_unvisited();
         rgb_set(WHITE);
-        eeprom_write_block(Distances, (uint8_t *)1, ARRAYSIZE);
-        eeprom_write_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
+        eeprom_update_block(Walls, (uint8_t *)1, ARRAYSIZE);
         rgb_set(OFF);
     }
     return 0;
@@ -116,8 +116,8 @@ void speed_run()
     {
         _delay_ms(5);
         count++;
-        straight(SPEED);
-        if (count % 150 == 0)
+        straight(1000);
+        if (count % 120 == 0)
         {
             squares += 1;
             set_loc();
@@ -205,6 +205,7 @@ void step()
 {
     read_set_walls();
     flood();
+    next_square();
     turn_if_needed();
 }
 

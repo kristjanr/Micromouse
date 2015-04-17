@@ -9,7 +9,7 @@
 #ifndef LABYRINTH_H_
 #define LABYRINTH_H_
 
-#define ARRAY_LENGTH 7 // 12
+#define ARRAY_LENGTH 12 // 12
 #define NWall 1
 #define EWall 2
 #define SWall 4
