@@ -82,7 +82,7 @@ int main(void)
         eeprom_read_block(Walls, (uint8_t *)1, ARRAYSIZE);
         rgb_set(YELLOW);
         GOAL_COLUMN = 6;
-        GOAL_ROW = 6;
+        GOAL_ROW = 5;
         flood();
         next_square();
         turn_if_needed();
@@ -95,7 +95,6 @@ int main(void)
         _delay_ms(500);
         step();
         mapping_run();
-        _delay_ms(100);
         GOAL_COLUMN = 0;
         GOAL_ROW = 0;
         step();
@@ -117,7 +116,7 @@ void speed_run()
         _delay_ms(5);
         count++;
         straight(1000);
-        if (count % 120 == 0)
+        if (count % 127 == 0)
         {
             squares += 1;
             set_loc();
@@ -142,7 +141,7 @@ void mapping_run()
             speed += 50;
         }
         straight(speed);
-        if (count % 155 == 0)
+        if (count % 160 == 0)
         {
             stop();
             speed = 0;
@@ -260,9 +259,9 @@ void read_set_walls()
     // read front wall
     if (get_front_left() > 40 && get_front_right() > 35) add_front_wall_info();
     // read right wall
-    if (get_right() > 70) add_right_wall_info();
+    if (get_right() > 60) add_right_wall_info();
     // read left wall
-    if (get_left() > 75) add_left_wall_info();
+    if (get_left() > 65) add_left_wall_info();
     Walls[CurrentRow][CurrentColumn] |= VISITED;
 }
 

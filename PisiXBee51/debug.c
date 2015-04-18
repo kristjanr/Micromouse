@@ -89,36 +89,33 @@ int main(void)
     }
     if (sw1_read())
     {
-        rgb_set(OFF);
-
-        eeprom_read_block(Distances, (uint8_t *)1, ARRAYSIZE);
-        eeprom_read_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
+        rgb_set(WHITE);
         _delay_ms(500);
+        eeprom_read_block(Walls, (uint8_t *)1, ARRAYSIZE);
+        rgb_set(YELLOW);
         GOAL_COLUMN = 6;
-        GOAL_ROW = 6;
-        step();
+        GOAL_ROW = 5;
+        flood();
+        next_square();
+        turn_if_needed();
+        rgb_set(OFF);
         speed_run();
     }
     else if (sw2_read())
     {
         rgb_set(OFF);
-        _delay_ms(1000);
+        _delay_ms(500);
         step();
-        mapping_run_gradual();
+        mapping_run();
         sprintf(buff, "Going back! \n\r");
-        radio_puts(buff);
-        _delay_ms(1000);
         GOAL_COLUMN = 0;
         GOAL_ROW = 0;
         step();
-        mapping_run_gradual();
-        print_distance_labyrinth();
-        print_wall_labyrinth();
+        mapping_run();
         put_walls_to_unvisited();
-        print_distance_labyrinth();
-        print_wall_labyrinth();
-        eeprom_write_block(Distances, (uint8_t *)1, ARRAYSIZE);
-        eeprom_write_block(Walls, (uint8_t *)+1, ARRAYSIZE+ARRAYSIZE);
+        rgb_set(WHITE);
+        eeprom_update_block(Walls, (uint8_t *)1, ARRAYSIZE);
+        rgb_set(OFF);
     }
     return 0;
 }
@@ -160,7 +157,7 @@ void speed_run()
         {
             squares += 1;
             set_loc();
-            set_next_square();
+            next_square();
             turn_if_needed();
         }
     }
@@ -170,39 +167,6 @@ int count = 0;
 int squares = 1;
 
 void mapping_run()
-{
-    while (!(CurrentRow == GOAL_ROW && CurrentColumn == GOAL_COLUMN))
-    {
-        _delay_ms(5);
-        count++;
-        straight(SPEED);
-        if (count % 125 == 0)
-        {
-            gradual_stop();
-            if (wall())
-            {
-                rgb_set(RED);
-                sprintf(buff, " \n\r wall! count: %d \n\r", count);
-                radio_puts(buff);
-                count = 0;
-            }
-            else
-            {
-                rgb_set(WHITE);
-            }
-            squares += 1;
-            sprintf(buff, "squares: %d \n\r", squares);
-            radio_puts(buff);
-            set_loc();
-            step();
-            //break;
-            //_delay_ms(2000);
-        }
-    }
-    stop();
-}
-
-void mapping_run_gradual()
 {
     int speed = 0;
     while (!sw1_read() && !(CurrentRow == GOAL_ROW && CurrentColumn == GOAL_COLUMN))
@@ -214,7 +178,7 @@ void mapping_run_gradual()
             speed += 50;
         }
         straight(speed);
-        if (count % 132 == 0)
+        if (count % 135 == 0)
         {
             gradual_stop();
             speed = 0;
@@ -388,6 +352,7 @@ void step()
     read_set_walls();
     print_wall_labyrinth();
     flood();
+    next_square();
     print_distance_labyrinth();
     turn_if_needed();
     print_direction();
@@ -448,55 +413,35 @@ void set_loc()
     radio_puts(buff);
 }
 
+
 void read_set_walls()
 {
     // read front wall
     if (get_front_left() > 40 && get_front_right() > 35) add_front_wall_info();
     // read right wall
-    if (get_right() > 70) add_right_wall_info();
+    if (get_right() > 60) add_right_wall_info();
     // read left wall
-    if (get_left() > 75) add_left_wall_info();
+    if (get_left() > 65) add_left_wall_info();
     Walls[CurrentRow][CurrentColumn] |= VISITED;
-}
-
-void set_wall(int wall)
-{
-    Walls[CurrentRow][CurrentColumn] |= wall;
-    if (wall == NWall && CurrentRow - 1 >= 0)
-    {
-        Walls[CurrentRow -1][CurrentColumn] |= SWall;
-    }
-    else if (wall == SWall && CurrentRow + 1 < ARRAY_LENGTH)
-    {
-        Walls[CurrentRow + 1][CurrentColumn] |= NWall;
-    }
-    else if (wall == EWall && CurrentColumn + 1 < ARRAY_LENGTH)
-    {
-        Walls[CurrentRow][CurrentColumn + 1] |= WWall;
-    }
-    else if (wall == WWall && CurrentColumn - 1 >= 0)
-    {
-        Walls[CurrentRow][CurrentColumn - 1] |= EWall;
-    }
 }
 
 void add_front_wall_info()
 {
     if (n_direction() == N)
     {
-        set_wall(NWall);
+        set_wall(NWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == E)
     {
-        set_wall(EWall);
+        set_wall(EWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == S)
     {
-        set_wall(SWall);
+        set_wall(SWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == W)
     {
-        set_wall(WWall);
+        set_wall(WWall, CurrentRow, CurrentColumn);
     }
 }
 
@@ -504,19 +449,19 @@ void add_right_wall_info()
 {
     if (n_direction() == N)
     {
-        set_wall(EWall);
+        set_wall(EWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == E)
     {
-        set_wall(SWall);
+        set_wall(SWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == S)
     {
-        set_wall(WWall);
+        set_wall(WWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == W)
     {
-        set_wall(NWall);
+        set_wall(NWall, CurrentRow, CurrentColumn);
     }
 }
 
@@ -524,22 +469,42 @@ void add_left_wall_info()
 {
     if (n_direction() == N)
     {
-        set_wall(WWall);
+        set_wall(WWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == E)
     {
-        set_wall(NWall);
+        set_wall(NWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == S)
     {
-        set_wall(EWall);
+        set_wall(EWall, CurrentRow, CurrentColumn);
     }
     else if (n_direction() == W)
     {
-        set_wall(SWall);
+        set_wall(SWall, CurrentRow, CurrentColumn);
     }
 }
 
+void set_wall(int wall, int row, int column)
+{
+    Walls[row][column] |= wall;
+    if (wall == NWall && row - 1 >= 0)
+    {
+        Walls[row -1][column] |= SWall;
+    }
+    else if (wall == SWall && row + 1 < ARRAY_LENGTH)
+    {
+        Walls[row + 1][column] |= NWall;
+    }
+    else if (wall == EWall && column + 1 < ARRAY_LENGTH)
+    {
+        Walls[row][column + 1] |= WWall;
+    }
+    else if (wall == WWall && column - 1 >= 0)
+    {
+        Walls[row][column - 1] |= EWall;
+    }
+}
 int n_direction()
 {
     if (robot_direction == 360)

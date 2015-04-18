@@ -12,8 +12,8 @@ void next_square();
 int highest_neighbouring_square(unsigned int, unsigned int);
 int get_neighbour(int, int);
 int max(int a[], int num_elements);
-int GOAL_ROW = 6;
 int GOAL_COLUMN = 6;
+int GOAL_ROW = 5;
 
 void build_labyrinth()
 {
