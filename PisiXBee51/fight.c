@@ -81,7 +81,7 @@ int main(void)
         _delay_ms(500);
         eeprom_read_block(Walls, (uint8_t *)1, ARRAYSIZE);
         rgb_set(YELLOW);
-        GOAL_COLUMN = 6;
+        GOAL_COLUMN = 5;
         GOAL_ROW = 5;
         flood();
         next_square();
@@ -116,7 +116,7 @@ void speed_run()
         _delay_ms(5);
         count++;
         straight(1000);
-        if (count % 127 == 0)
+        if (count % 125 == 0)
         {
             squares += 1;
             set_loc();
@@ -141,7 +141,7 @@ void mapping_run()
             speed += 50;
         }
         straight(speed);
-        if (count % 160 == 0)
+        if (count % 162 == 0)
         {
             stop();
             speed = 0;
