@@ -23,6 +23,8 @@
 #define QDEC2_A			4
 #define QDEC2_B			5
 
+#define RIGHTENC	TCC0.CNT
+#define LEFTENC		TCC1.CNT
 // Initialize motor controller
 void motor_init(void);
 // Initialize quadrature decoder

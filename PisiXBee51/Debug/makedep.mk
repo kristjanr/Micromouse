@@ -28,5 +28,7 @@ drivers\gyro.c
 
 drivers\motor.c
 
+labyrinth.c
+
 main.c
 

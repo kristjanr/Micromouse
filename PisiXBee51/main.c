@@ -25,7 +25,7 @@
 #define FRONT_RIGHT_S 3
 #define RIGHT_S  5
 #define RIGHT_DIAG_S 2
-#define SPEED 800
+#define SPEED 10
 #define LEFT 2
 #define RIGHT 1
 #define FORWARD 0
@@ -63,6 +63,33 @@ int n_direction();
 int robot_direction = E;
 int CurrentColumn = 0;
 int CurrentRow = 0;
+
+void motor_forward(int ticks) {
+	LEFTENC = 0;
+	RIGHTENC = 0;
+	int current_l_speed = 0;
+	int current_r_speed = 0;
+	while(LEFTENC<ticks && RIGHTENC < ticks) {
+		if (current_l_speed< SPEED) {current_l_speed += 2;}
+		if (current_r_speed< SPEED) {current_r_speed += 2;}
+		motor_set(current_l_speed, current_r_speed);
+		_delay_ms(1);
+	}
+}
+
+
+void turn_R_time()// turn right
+{
+    uint32_t aeg =systick_read() +TR_TIME;
+    motor_set(SPEED,-SPEED);
+    /*while(systick_read()<aeg)
+    {
+
+    }*/
+	_delay_ms(TR_TIME);
+    motor_set(0,0);
+}
+
 
 int main(void)
 {
@@ -257,11 +284,11 @@ void turn_around()
 void read_set_walls()
 {
     // read front wall
-    if (get_front_left() > 40 && get_front_right() > 35) add_front_wall_info();
+    if (get_front_left() > 130 && get_front_right() > 130) add_front_wall_info();
     // read right wall
-    if (get_right() > 60) add_right_wall_info();
+    if (get_right() > 90) add_right_wall_info();
     // read left wall
-    if (get_left() > 65) add_left_wall_info();
+    if (get_left() > 90) add_left_wall_info();
     Walls[CurrentRow][CurrentColumn] |= VISITED;
 }
 
