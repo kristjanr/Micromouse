@@ -92,18 +92,6 @@ int robot_direction = E;
 int CurrentColumn = 0;
 int CurrentRow = 0;
 
-void motor_forward(int ticks) {
-    LEFTENC = 0;
-    RIGHTENC = 0;
-    int current_l_speed = 0;
-    int current_r_speed = 0;
-    while (LEFTENC < ticks && RIGHTENC < ticks) {
-        if (current_l_speed < SPEED) { current_l_speed += 2; }
-        if (current_r_speed < SPEED) { current_r_speed += 2; }
-        motor_set(current_l_speed, current_r_speed);
-        _delay_ms(1);
-    }
-}
 
 void turn_R() {
     RIGHTENC = 0;
@@ -114,7 +102,7 @@ void turn_R() {
     }
 }
 
-void turn_L(int speed) {
+void turn_L() {
     LEFTENC = 0;
     int speed = TURN_SPEED;
     while (LEFTENC > -330) {
@@ -131,8 +119,13 @@ int main(void) {
     motor_init();
     build_labyrinth();
     rgb_set(PINK);
+	// Initialize quadrature decoder
+	void quadrature_init();
     while (!sw2_read() && !sw1_read()) {
     }
+	while (!sw1_read()){
+		straight(300);
+	}
     if (sw1_read()) {
         rgb_set(WHITE);
         _delay_ms(500);
@@ -237,13 +230,13 @@ void straight(int speed) {
     else if (left_wall) {
         rgb_set(BLUE);
         // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (ld - 42);
+        diag_diff = (ld - 42)/10;
         motors(speed + diag_diff, speed - diag_diff);
     }
     else if (right_wall) {
         rgb_set(YELLOW);
         // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (38 - rd);
+        diag_diff = (38 - rd)/10;
         motors(speed + diag_diff, speed - diag_diff);
     }
 }
