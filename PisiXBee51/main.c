@@ -11,6 +11,7 @@
 #include "drivers/board.h"
 #include "drivers/adc.h"
 #include "drivers/motor.h"
+#include "drivers/com.h"
 #include "labyrinth.h"
 
 #define LEFT_DIRECTION -90
@@ -120,12 +121,23 @@ int main(void) {
     build_labyrinth();
     rgb_set(PINK);
 	// Initialize quadrature decoder
-	void quadrature_init();
+	quadrature_init();
+	radio_init(57600);
     while (!sw2_read() && !sw1_read()) {
     }
+	char BUF[30];
+	_delay_ms(500);
 	while (!sw1_read()){
+		rgb_set(OFF);
+		sprintf(BUF, "%d %d %d %d %d %d\n\r",get_front_left(), get_left_diag(), get_left(), get_front_right(), get_right_diag(), get_right() );
+				
+				_delay_ms(500);
+				radio_puts(BUF);
 		straight(300);
 	}
+	
+	
+	
     if (sw1_read()) {
         rgb_set(WHITE);
         _delay_ms(500);
@@ -224,20 +236,12 @@ void straight(int speed) {
     int diag_diff = 0;
     if (no_walls) {
         rgb_set(GREEN);
-        diag_diff = 0;
-        motors(speed, speed);
     }
     else if (left_wall) {
         rgb_set(BLUE);
-        // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (ld - 42)/10;
-        motors(speed + diag_diff, speed - diag_diff);
     }
     else if (right_wall) {
-        rgb_set(YELLOW);
-        // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (38 - rd)/10;
-        motors(speed + diag_diff, speed - diag_diff);
+        rgb_set(RED);
     }
 }
 
