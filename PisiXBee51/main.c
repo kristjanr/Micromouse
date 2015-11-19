@@ -185,15 +185,14 @@ void mapping_run() {
     LEFTENC = 0;
     int squares = 1;
     int speed = 0;
+
     while (!sw1_read() && !(CurrentRow == GOAL_ROW && CurrentColumn == GOAL_COLUMN)) {
-        // TODO: delay ja count++ asemele klikkide lugemine
-        _delay_ms(5);
-        count++;
-        // TODO: seda speed väärtust muuta
-        if (speed < 400) {
+        if (speed < 300) {
             speed += 25;
         }
+        rgb_set(WHITE);
         straight(speed);
+
         // TODO: count asemele klikkide lugemine
         if (LEFTENC + RIGHTENC == 2160) {
             stop();
@@ -211,7 +210,6 @@ void mapping_run() {
             }
             if (wall()) {
                 rgb_set(RED);
-                count = 0;
             }
             else {
                 rgb_set(WHITE);
@@ -239,13 +237,13 @@ void straight(int speed) {
     else if (left_wall) {
         rgb_set(BLUE);
         // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (ld - 42) * 4;
+        diag_diff = (ld - 42);
         motors(speed + diag_diff, speed - diag_diff);
     }
     else if (right_wall) {
         rgb_set(YELLOW);
         // TODO: diag diff kordajat vähendada natuke ilmselt
-        diag_diff = (38 - rd) * 4;
+        diag_diff = (38 - rd);
         motors(speed + diag_diff, speed - diag_diff);
     }
 }
@@ -359,6 +357,7 @@ void motors(int16_t l_speed, int16_t r_speed) {
 }
 
 void stop() {
+    rgb_set(OFF);
     motor_set(0, 0);
 }
 
