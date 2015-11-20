@@ -1,11 +1,3 @@
-/*
- * labyrinth.h
- *
- * Created: 11.04.2015 18:32:49
- *  Author: Kristjan Roosild
- */
-
-
 #ifndef LABYRINTH_H_
 #define LABYRINTH_H_
 

@@ -1,9 +1,3 @@
-/*
- * labyrinth.c
- *
- * Created: 11.04.2015 18:08:04
- *  Author: Kristjan Roosild
- */
 #include "labyrinth.h"
 
 #define CHECKED 16
