@@ -64,10 +64,35 @@ int main(void) {
     }
     _delay_ms(500);
 
-
+    while (!sw2_read() && !sw1_read())
+    {
+    }
+    // start mapping run
     if (sw1_read()) {
+        // corner to centre
+        rgb_set(OFF);
+        _delay_ms(500);
+        step();
+        mapping_run();
+
+        // back from centre to corner
+        GOAL_COLUMN = 0;
+        GOAL_ROW = 0;
+        step();
+        mapping_run();
+
+        // do stuff with labyrinth
+        put_walls_to_unvisited();
+        rgb_set(WHITE);
+        eeprom_update_block(Walls, (uint8_t *) 1, ARRAYSIZE);
+        rgb_set(OFF);
+    }
+    // start speed run
+    else if (sw2_read()) {
         rgb_set(WHITE);
         _delay_ms(500);
+
+        // corner to centre
         eeprom_read_block(Walls, (uint8_t *) 1, ARRAYSIZE);
         rgb_set(YELLOW);
         GOAL_COLUMN = 3;
@@ -77,20 +102,6 @@ int main(void) {
         turn_if_needed();
         rgb_set(OFF);
         speed_run();
-    }
-    else if (sw2_read()) {
-        rgb_set(OFF);
-        _delay_ms(500);
-        step();
-        mapping_run();
-        GOAL_COLUMN = 0;
-        GOAL_ROW = 0;
-        step();
-        mapping_run();
-        put_walls_to_unvisited();
-        rgb_set(WHITE);
-        eeprom_update_block(Walls, (uint8_t *) 1, ARRAYSIZE);
-        rgb_set(OFF);
     }
     return 0;
 }

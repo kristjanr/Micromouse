@@ -1,5 +1,7 @@
 #include "all.h"
 
+// debugging methods begin
+
 void straight_sense_only() {
     uint16_t ld = get_left_diag();
     uint16_t rd = get_right_diag();
@@ -33,6 +35,27 @@ void debug_sensors() {
     radio_puts(BUF);
     straight_sense_only();
 }
+
+void move_one_square_turn_around_when_wall(int max_speed) {
+    LEFTENC = 0;
+    RIGHTENC = 0;
+    while (LEFTENC + RIGHTENC < 2160) {
+        if (speed < max_speed) {
+            speed += 25;
+        }
+        straight(speed);
+        if (wall()) {
+            rgb_set(RED);
+            turn_R();
+            turn_R();
+            return 0;
+        }
+        else {
+            rgb_set(WHITE);
+        }
+    }
+}
+// debugging methods end
 
 void speed_run() {
     int squares = 1;
@@ -72,26 +95,6 @@ void move_one_square(int max_speed) {
             rgb_set(RED);
             // comment in if all else works
             // calibrate_front();
-            return 0;
-        }
-        else {
-            rgb_set(WHITE);
-        }
-    }
-}
-
-void move_one_square_turn_around_when_wall(int max_speed) {
-    LEFTENC = 0;
-    RIGHTENC = 0;
-    while (LEFTENC + RIGHTENC < 2160) {
-        if (speed < max_speed) {
-            speed += 25;
-        }
-        straight(speed);
-        if (wall()) {
-            rgb_set(RED);
-            turn_R();
-            turn_R();
             return 0;
         }
         else {
