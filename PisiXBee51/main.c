@@ -1,4 +1,5 @@
 #include "all.h"
+#include <avr/eeprom.h>
 
 int main(void) {
     clock_init();
@@ -83,8 +84,11 @@ int main(void) {
 
         // do stuff with labyrinth
         put_walls_to_unvisited();
+        rgb_set(YELLOW);
+        flood();
         rgb_set(WHITE);
         eeprom_update_block(Walls, (uint8_t *) 1, ARRAYSIZE);
+        eeprom_update_block(Distances, ARRAYSIZE + 1, ARRAYSIZE);
         rgb_set(OFF);
     }
     // start speed run
@@ -94,10 +98,8 @@ int main(void) {
 
         // corner to centre
         eeprom_read_block(Walls, (uint8_t *) 1, ARRAYSIZE);
+        eeprom_read_block(Distances, ARRAYSIZE + 1, ARRAYSIZE);
         rgb_set(YELLOW);
-        GOAL_COLUMN = 3;
-        GOAL_ROW = 3;
-        flood();
         next_square();
         turn_if_needed();
         rgb_set(OFF);

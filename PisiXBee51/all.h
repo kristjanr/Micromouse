@@ -1,7 +1,6 @@
 #ifndef ALL_H_
 #define ALL_H_
 
-#include <avr/eeprom.h>
 #include <avr/io.h>
 #include <stdlib.h>
 #include "drivers/board.h"
