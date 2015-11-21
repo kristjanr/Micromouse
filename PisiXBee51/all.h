@@ -88,14 +88,8 @@ uint16_t get_front_right();
 
 int wall();
 
-int turns = 0;
-
 int get_next_direction();
 
 int n_direction();
-
-int robot_direction = E;
-int CurrentColumn = 0;
-int CurrentRow = 0;
 
 #endif /* ALL_H_ */
